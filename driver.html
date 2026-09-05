@@ -1,0 +1,96 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FUL Bus Tracker - Driver</title>
+
+    <link rel="stylesheet" href="driver.css">
+</head>
+
+<body>
+
+    <main class="driver-page">
+
+        <!-- Login -->
+        <section id="loginSection" class="driver-card">
+
+            <h1>FUL BUS TRACKER</h1>
+
+            <p>Driver Portal</p>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter driver password"
+            >
+
+            <button onclick="login()">
+                LOGIN
+            </button>
+
+            <p id="loginMessage"></p>
+
+        </section>
+
+
+        <!-- Dashboard -->
+        <section id="dashboardSection" class="driver-card hidden">
+
+            <h1>DRIVER DASHBOARD</h1>
+
+            <p class="welcome">
+                Welcome, Driver
+            </p>
+
+            <div class="bus-info">
+                <span>Bus</span>
+                <strong>FUL-001</strong>
+            </div>
+
+            <div class="status">
+                Status:
+                <strong id="status">OFFLINE</strong>
+            </div>
+
+            <button
+                id="startButton"
+                onclick="startTrip()"
+            >
+                START TRIP
+            </button>
+
+            <button
+                id="stopButton"
+                onclick="stopTrip()"
+                class="stop hidden"
+            >
+                STOP TRIP
+            </button>
+
+            <div class="location">
+
+                <p>
+                    Latitude:
+                    <span id="latitude">--</span>
+                </p>
+
+                <p>
+                    Longitude:
+                    <span id="longitude">--</span>
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="driver.js"></script>
+
+</body>
+</html>
