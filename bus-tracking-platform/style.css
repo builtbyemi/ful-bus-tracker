@@ -1,0 +1,430 @@
+
+
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #ffffff;
+}
+
+
+/* =========================
+   MAIN TRACKER
+========================= */
+
+.tracker {
+    min-height: 100vh;
+    width: 100%;
+
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    background: #33496A;
+}
+
+/* =========================
+   BACKGROUND IMAGE
+========================= */
+
+.tracker::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background-image: url("images/bus.jfif");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    opacity: 0.22;
+
+    z-index: 0;
+}
+
+
+/* =========================
+   COLOR OVERLAY
+========================= */
+
+.tracker::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: rgba(15, 28, 53, 0.55);
+
+    z-index: 1;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.tracker-content {
+    position: relative;
+    z-index: 2;
+
+    width: 90%;
+    max-width: 650px;
+
+    margin-top: -30px;
+}
+
+
+/* =========================
+   TITLE
+========================= */
+
+.tracker-content h1 {
+    font-size: clamp(42px, 7vw, 78px);
+
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -3px;
+
+    margin-bottom: 15px;
+}
+
+
+/* =========================
+   SCHOOL NAME
+========================= */
+
+.tracker-content h2 {
+    font-size: clamp(18px, 3vw, 25px);
+
+    font-weight: 500;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   DESCRIPTION
+========================= */
+
+.tracker-content p {
+    max-width: 520px;
+
+    margin: 0 auto;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+
+    opacity: 0.9;
+}
+
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.actions {
+    margin-top: 35px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+}
+
+.action-btn,
+.track-btn {
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    padding: 16px 28px;
+
+    border-radius: 50px;
+
+    transition: transform 0.2s ease,
+                opacity 0.2s ease;
+}
+
+
+/* Regular buttons */
+
+.action-btn {
+    background: #ffffff;
+
+    color: #087b80;
+}
+
+
+/* Track button */
+
+.track-btn {
+    background: #f4c542;
+
+    color: #111111;
+
+    padding: 17px 32px;
+}
+
+
+/* Hover */
+
+.action-btn:hover,
+.track-btn:hover {
+    transform: translateY(-3px);
+
+    opacity: 0.9;
+}
+
+
+/* =========================
+   SCHOOL BRANDING
+========================= */
+
+.school-brand {
+    position: absolute;
+
+    bottom: 30px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: 3;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+/* FUL Logo */
+
+.school-brand img {
+    width: 65px;
+
+    height: 65px;
+
+    object-fit: contain;
+}
+
+
+/* Version */
+
+.school-brand span {
+    font-size: 11px;
+
+    letter-spacing: 1px;
+
+    opacity: 0.7;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .tracker-content {
+        margin-top: -10px;
+    }
+
+    .tracker-content h1 {
+        letter-spacing: -2px;
+    }
+
+    .tracker-content p {
+        font-size: 14px;
+    }
+
+    .actions {
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+    .action-btn,
+    .track-btn {
+        width: 210px;
+    }
+
+    .school-brand {
+        bottom: 20px;
+    }
+
+    .school-brand img {
+        width: 55px;
+        height: 55px;
+    }
+}
+
+.scrolling-text {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 90%;
+    max-width: 900px;
+    height: 45px;
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50px;
+
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+
+    z-index: 2;
+}
+
+.scrolling-track {
+    display: flex;
+
+    width: max-content;
+
+    white-space: nowrap;
+
+    animation: continuousScroll 15s linear infinite;
+}
+
+.scrolling-track span {
+    padding-right: 80px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+@keyframes continuousScroll {
+
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+
+}
+
+.driver-login {
+    position: fixed !important;
+
+    top: 100px !important;
+    right: 30px !important;
+
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 20px;
+
+    border-radius: 50px;
+
+    background: #ffffff;
+    color: #087b80;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    transition: all 0.25s ease;
+}
+
+.driver-login:hover {
+    transform: translateY(-3px) scale(1.03);
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 600px) {
+
+    .driver-login {
+        top: 18px;
+        right: 18px;
+
+        padding: 10px 15px;
+
+        font-size: 11px;
+    }
+
+}
+
+.track-btn {
+    display: inline-block;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 17px 32px;
+    border-radius: 50px;
+    background: #f4c542;
+    color: #111;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.track-btn:hover {
+    transform: translateY(-3px);
+    opacity: 0.9;
+}
+
+.track-btn,
+.track-btn:visited,
+.track-btn:hover,
+.track-btn:active {
+    display: inline-block;
+    background: #087b80 !important;
+    color: white !important;
+    text-decoration: none !important;
+    border: none;
+}

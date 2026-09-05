@@ -1,0 +1,387 @@
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #087b80;
+}
+
+.map-header {
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 30px;
+
+    background: #087b80;
+
+    color: white;
+}
+
+.map-header a {
+    color: white;
+
+    text-decoration: none;
+
+    font-weight: 700;
+}
+
+.map-header h1 {
+    font-size: 20px;
+}
+
+#map {
+    width: 100%;
+    height: calc(100vh - 70px);
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .map-header {
+        height: 60px;
+
+        padding: 0 16px;
+    }
+
+    .map-header h1 {
+        font-size: 15px;
+    }
+
+    .map-header a {
+        font-size: 13px;
+    }
+
+}
+
+/* ============================= */
+/* STUDENT BUS PANEL */
+/* ============================= */
+
+.bus-panel {
+    position: absolute;
+    top: 90px;
+    left: 25px;
+    width: 330px;
+    padding: 22px;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #222;
+
+    border-radius: 20px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+
+    z-index: 1000;
+}
+
+
+/* Panel Header */
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.panel-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #087b80;
+}
+
+.panel-header h2 {
+    margin-top: 4px;
+    font-size: 22px;
+}
+
+
+/* Live Indicator */
+
+.live-dot {
+    width: 11px;
+    height: 11px;
+
+    background: #20b26b;
+
+    border-radius: 50%;
+
+    box-shadow: 0 0 0 5px rgba(32, 178, 107, 0.15);
+}
+
+
+/* Bus Cards */
+
+.bus-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bus-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 13px;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+
+    background: #fff;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition: 0.2s ease;
+}
+
+.bus-card:hover {
+    transform: translateY(-2px);
+    border-color: #087b80;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Bus Icon */
+
+.bus-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eefafa;
+
+    border-radius: 10px;
+
+    font-size: 20px;
+
+    margin-right: 10px;
+}
+
+
+/* Bus Details */
+
+.bus-details {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.bus-details strong {
+    font-size: 14px;
+}
+
+.bus-details span {
+    font-size: 11px;
+    color: #777;
+}
+
+
+/* Status */
+
+.bus-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.bus-status span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+}
+
+.online {
+    color: #20a866;
+}
+
+.online span {
+    background: #20a866;
+}
+
+.offline {
+    color: #999;
+}
+
+.offline span {
+    background: #aaa;
+}
+
+
+/* Selected Bus */
+
+.selected-bus {
+    margin-top: 18px;
+
+    padding: 17px;
+
+    border-radius: 14px;
+
+    background: #087b80;
+
+    color: white;
+}
+
+.selected-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    opacity: 0.7;
+}
+
+.selected-bus h3 {
+    margin-top: 5px;
+    font-size: 20px;
+}
+
+.selected-info {
+    display: flex;
+    gap: 30px;
+
+    margin-top: 15px;
+}
+
+.selected-info div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.selected-info span {
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+.selected-info strong {
+    font-size: 12px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .bus-panel {
+        top: 75px;
+        left: 10px;
+        right: 10px;
+
+        width: auto;
+
+        padding: 16px;
+
+        border-radius: 16px;
+    }
+
+    .panel-header {
+        margin-bottom: 12px;
+    }
+
+    .panel-header h2 {
+        font-size: 18px;
+    }
+
+    .bus-card {
+        padding: 10px;
+    }
+
+}
+
+.minimize-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #eefafa;
+    color: #087b80;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 10;
+}
+
+.minimize-btn:hover {
+    background: #087b80;
+    color: white;
+    transform: none;
+}
+
+.bus-panel {
+    position: absolute;
+    /* keep your existing properties */
+    transition: all 0.3s ease;
+}
+
+.bus-panel.minimized {
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
+
+    right: 20px;
+    left: auto;
+}
+
+.bus-panel.minimized .panel-header,
+.bus-panel.minimized .bus-list,
+.bus-panel.minimized .selected-bus {
+    display: none;
+}
+
+.bus-panel.minimized .minimize-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: auto;
+
+    transform: translate(-50%, -50%);
+
+    width: 58px;
+    height: 58px;
+
+    background: #087b80;
+    color: white;
+}
+
+.bus-panel.minimized .minimize-btn:hover {
+    transform: translate(-50%, -50%);
+}

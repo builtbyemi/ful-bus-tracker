@@ -1,0 +1,148 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FUL Bus Tracker</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link rel="stylesheet" href="track.css">
+</head>
+
+<body>
+
+    <header class="map-header">
+
+        <a href="index.html">
+            ← Back Home
+        </a>
+
+        <h1>FUL BUS TRACKER</h1>
+
+    </header>
+
+
+    <main>
+
+        <div id="map"></div>
+
+
+        <!-- Student Bus Panel -->
+        <aside class="bus-panel">
+
+            <button class="minimize-btn" onclick="toggleBusPanel()">−</button>
+
+            <div class="panel-header">
+                <div>
+                    <span class="panel-label">LIVE TRACKING</span>
+                    <h2>Track Your Bus</h2>
+                </div>
+
+                <span class="live-dot"></span>
+            </div>
+
+
+            <div class="bus-list">
+
+                <!-- Bus 001 -->
+                <button class="bus-card" onclick="selectBus('FUL-001')">
+    <div class="bus-icon">
+        🚌
+    </div>
+
+    <div class="bus-details">
+        <strong>FUL-001</strong>
+        <span>Main Campus Route</span>
+    </div>
+
+    <div id="busStatus-FUL-001" class="bus-status offline">
+        <span></span>OFFLINE
+    </div>
+</button>
+
+
+<button class="bus-card" onclick="selectBus('FUL-002')">
+    <div class="bus-icon">
+        🚌
+    </div>
+
+    <div class="bus-details">
+        <strong>FUL-002</strong>
+        <span>Lokoja Route</span>
+    </div>
+
+    <div id="busStatus-FUL-002" class="bus-status offline">
+        <span></span>OFFLINE
+    </div>
+</button>
+
+
+<button class="bus-card" onclick="selectBus('FUL-003')">
+    <div class="bus-icon">
+        🚌
+    </div>
+
+    <div class="bus-details">
+        <strong>FUL-003</strong>
+        <span>Main Campus Route</span>
+    </div>
+
+    <div id="busStatus-FUL-003" class="bus-status offline">
+        <span></span>OFFLINE
+    </div>
+</button>
+            </div>
+
+
+            <!-- Selected Bus -->
+            <div class="selected-bus">
+
+                <span class="selected-label">
+                    SELECTED BUS
+                </span>
+
+                <h3 id="selectedBus">
+                    No bus selected
+                </h3>
+
+                <div class="selected-info">
+
+                    <div>
+                        <span>Status</span>
+                        <strong id="selectedStatus">
+                            —
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Route</span>
+                        <strong id="selectedRoute">
+                            —
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+    <script type="module" src="track.js"></script>
+</body>
+
+</html>
