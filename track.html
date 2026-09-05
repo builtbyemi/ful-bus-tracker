@@ -1,148 +1,219 @@
 
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>FUL Bus Tracker</title>
 
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+<title>FUL Bus Tracker</title>
 
-    <link rel="stylesheet" href="track.css">
+<!-- Leaflet -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<!-- Track CSS -->
+<link rel="stylesheet" href="track.css">
+```
+
 </head>
 
 <body>
 
-    <header class="map-header">
 
-        <a href="index.html">
-            ← Back Home
-        </a>
+<!-- NAVBAR -->
+<header class="map-header">
 
-        <h1>FUL BUS TRACKER</h1>
+    <a href="index.html" class="back-home">
+        ← Back Home
+    </a>
 
-    </header>
+    <h1>FUL BUS TRACKER</h1>
 
+    <button
+        class="bus-status-nav"
+        onclick="toggleBusPanel()"
+        type="button"
+    >
+        🚌 Bus Status
+    </button>
 
-    <main>
-
-        <div id="map"></div>
-
-
-        <!-- Student Bus Panel -->
-        <aside class="bus-panel">
-
-            <button class="minimize-btn" onclick="toggleBusPanel()">−</button>
-
-            <div class="panel-header">
-                <div>
-                    <span class="panel-label">LIVE TRACKING</span>
-                    <h2>Track Your Bus</h2>
-                </div>
-
-                <span class="live-dot"></span>
-            </div>
+</header>
 
 
-            <div class="bus-list">
+<!-- MAP -->
+<main>
 
-                <!-- Bus 001 -->
-                <button class="bus-card" onclick="selectBus('FUL-001')">
-    <div class="bus-icon">
-        🚌
-    </div>
-
-    <div class="bus-details">
-        <strong>FUL-001</strong>
-        <span>Main Campus Route</span>
-    </div>
-
-    <div id="busStatus-FUL-001" class="bus-status offline">
-        <span></span>OFFLINE
-    </div>
-</button>
+    <div id="map"></div>
 
 
-<button class="bus-card" onclick="selectBus('FUL-002')">
-    <div class="bus-icon">
-        🚌
-    </div>
+    <!-- BUS STATUS PANEL -->
+    <aside class="bus-panel hidden">
 
-    <div class="bus-details">
-        <strong>FUL-002</strong>
-        <span>Lokoja Route</span>
-    </div>
-
-    <div id="busStatus-FUL-002" class="bus-status offline">
-        <span></span>OFFLINE
-    </div>
-</button>
+        <!-- Close / Minimize -->
+        <button
+            class="minimize-btn"
+            onclick="toggleBusPanel()"
+            type="button"
+            aria-label="Close bus status"
+        >
+            ×
+        </button>
 
 
-<button class="bus-card" onclick="selectBus('FUL-003')">
-    <div class="bus-icon">
-        🚌
-    </div>
+        <!-- Panel Header -->
+        <div class="panel-header">
 
-    <div class="bus-details">
-        <strong>FUL-003</strong>
-        <span>Main Campus Route</span>
-    </div>
-
-    <div id="busStatus-FUL-003" class="bus-status offline">
-        <span></span>OFFLINE
-    </div>
-</button>
-            </div>
-
-
-            <!-- Selected Bus -->
-            <div class="selected-bus">
-
-                <span class="selected-label">
-                    SELECTED BUS
+            <div>
+                <span class="panel-label">
+                    LIVE TRACKING
                 </span>
 
-                <h3 id="selectedBus">
-                    No bus selected
-                </h3>
+                <h2>
+                    Bus Status
+                </h2>
+            </div>
 
-                <div class="selected-info">
+            <span class="live-dot"></span>
 
-                    <div>
-                        <span>Status</span>
-                        <strong id="selectedStatus">
-                            —
-                        </strong>
-                    </div>
+        </div>
 
-                    <div>
-                        <span>Route</span>
-                        <strong id="selectedRoute">
-                            —
-                        </strong>
-                    </div>
 
+        <!-- BUS LIST -->
+        <div class="bus-list">
+
+            <!-- FUL-001 -->
+            <button
+                class="bus-card"
+                onclick="selectBus('FUL-001')"
+                type="button"
+            >
+
+                <div class="bus-icon">
+                    🚌
+                </div>
+
+                <div class="bus-details">
+                    <strong>FUL-001</strong>
+                    <span>Main Campus Route</span>
+                </div>
+
+                <div
+                    id="busStatus-FUL-001"
+                    class="bus-status offline"
+                >
+                    <span></span>
+                    OFFLINE
+                </div>
+
+            </button>
+
+
+            <!-- FUL-002 -->
+            <button
+                class="bus-card"
+                onclick="selectBus('FUL-002')"
+                type="button"
+            >
+
+                <div class="bus-icon">
+                    🚌
+                </div>
+
+                <div class="bus-details">
+                    <strong>FUL-002</strong>
+                    <span>Lokoja Route</span>
+                </div>
+
+                <div
+                    id="busStatus-FUL-002"
+                    class="bus-status offline"
+                >
+                    <span></span>
+                    OFFLINE
+                </div>
+
+            </button>
+
+
+            <!-- FUL-003 -->
+            <button
+                class="bus-card"
+                onclick="selectBus('FUL-003')"
+                type="button"
+            >
+
+                <div class="bus-icon">
+                    🚌
+                </div>
+
+                <div class="bus-details">
+                    <strong>FUL-003</strong>
+                    <span>Main Campus Route</span>
+                </div>
+
+                <div
+                    id="busStatus-FUL-003"
+                    class="bus-status offline"
+                >
+                    <span></span>
+                    OFFLINE
+                </div>
+
+            </button>
+
+        </div>
+
+
+        <!-- SELECTED BUS -->
+        <div class="selected-bus">
+
+            <span class="selected-label">
+                SELECTED BUS
+            </span>
+
+            <h3 id="selectedBus">
+                No bus selected
+            </h3>
+
+            <div class="selected-info">
+
+                <div>
+                    <span>Status</span>
+                    <strong id="selectedStatus">—</strong>
+                </div>
+
+                <div>
+                    <span>Route</span>
+                    <strong id="selectedRoute">—</strong>
                 </div>
 
             </div>
 
-        </aside>
+        </div>
 
-    </main>
+    </aside>
+
+</main>
 
 
-    <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-    </script>
+<!-- Leaflet -->
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
-    <script type="module" src="track.js"></script>
+
+<!-- Track JS -->
+<script
+    type="module"
+    src="track.js">
+</script>
+
 </body>
 
 </html>

@@ -1039,3 +1039,11 @@ function() {
             "−";
     }
 };
+
+window.toggleBusPanel = function () {
+    const panel = document.querySelector(".bus-panel");
+
+    if (!panel) return;
+
+    panel.classList.toggle("hidden");
+};

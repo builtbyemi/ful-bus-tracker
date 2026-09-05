@@ -385,3 +385,462 @@ body {
 .bus-panel.minimized .minimize-btn:hover {
     transform: translate(-50%, -50%);
 }
+
+
+/* =========================================
+   MOBILE RESPONSIVE TRACK PAGE
+========================================= */
+
+/* Prevent horizontal shifting */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Make every element respect screen width */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Main tracking page */
+.track-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Map */
+#map {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Bus panel */
+.bus-panel {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Bus cards */
+.bus-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Prevent long text from pushing the layout */
+.bus-card * {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* =========================================
+   TABLETS
+========================================= */
+
+@media (max-width: 768px) {
+
+    body {
+        font-size: 14px;
+    }
+
+    #map {
+        width: 100%;
+        height: 70vh;
+        min-height: 450px;
+    }
+
+    .bus-panel {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+    }
+
+    .bus-card {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+}
+
+
+/* =========================================
+   PHONES
+========================================= */
+
+@media (max-width: 480px) {
+
+    body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Header */
+    header,
+    .header,
+    .top-bar {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Map */
+    #map {
+        width: 100%;
+        height: 62vh;
+        min-height: 380px;
+    }
+
+    /* Bus panel */
+    .bus-panel {
+        width: 100%;
+        max-width: 100%;
+        padding: 10px;
+        margin: 0;
+    }
+
+    /* Bus cards */
+    .bus-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        padding: 13px;
+        margin-bottom: 10px;
+
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Card text */
+    .bus-card h3,
+    .bus-card p,
+    .bus-card span {
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: break-word;
+    }
+
+    /* Status */
+    .bus-status {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+}
+
+
+/* =========================================
+   VERY SMALL PHONES
+========================================= */
+
+@media (max-width: 360px) {
+
+    #map {
+        height: 58vh;
+        min-height: 350px;
+    }
+
+    .bus-panel {
+        padding: 8px;
+    }
+
+    .bus-card {
+        padding: 11px;
+        gap: 8px;
+    }
+
+    .bus-status {
+        font-size: 11px;
+    }
+
+}
+
+.hidden {
+    display: none !important;
+}
+
+.bus-selection {
+    width: min(92%, 420px);
+    margin: 80px auto;
+    padding: 35px 25px;
+    text-align: center;
+
+    background: linear-gradient(145deg, #07111f, #0d1b2a);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 22px;
+
+    box-shadow: 0 25px 70px rgba(0,0,0,.4);
+}
+
+.selection-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: rgba(255,255,255,.07);
+
+    font-size: 32px;
+}
+
+.bus-selection h2 {
+    color: white;
+    margin-bottom: 8px;
+}
+
+.bus-selection p {
+    color: rgba(255,255,255,.55);
+    margin-bottom: 25px;
+}
+
+.select-bus-btn {
+    width: 100%;
+    padding: 17px;
+    margin-top: 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    text-align: left;
+
+    color: white;
+    background: rgba(255,255,255,.05);
+
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition: .25s ease;
+}
+
+.select-bus-btn span {
+    font-size: 12px;
+    color: rgba(255,255,255,.5);
+}
+
+.select-bus-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(0,140,255,.1);
+    border-color: rgba(0,170,255,.4);
+}
+
+.tracking-interface {
+    width: 100%;
+}
+
+.back-selection {
+    margin: 15px;
+    padding: 10px 16px;
+
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.05);
+    color: white;
+
+    cursor: pointer;
+}
+
+/* ================================
+MAP NAVBAR
+================================ */
+
+.map-header {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 70px;
+
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+padding: 0 25px;
+
+background: rgba(10, 15, 25, 0.95);
+backdrop-filter: blur(12px);
+
+z-index: 1000;
+
+
+}
+
+.map-header h1 {
+margin: 0;
+font-size: 20px;
+letter-spacing: 1px;
+}
+
+.back-home {
+color: white;
+text-decoration: none;
+font-weight: 500;
+}
+
+.back-home:hover {
+color: #008cff;
+}
+
+/* ================================
+BUS STATUS NAV BUTTON
+================================ */
+
+.bus-status-nav {
+border: none;
+background: #008cff;
+color: white;
+
+
+padding: 10px 16px;
+border-radius: 8px;
+
+font-size: 14px;
+font-weight: 600;
+
+cursor: pointer;
+
+transition: 0.2s ease;
+
+
+}
+
+.bus-status-nav:hover {
+background: #0074d9;
+transform: translateY(-1px);
+}
+
+/* ================================
+MAP
+================================ */
+
+#map {
+width: 100%;
+height: 100vh;
+}
+
+/* ================================
+BUS STATUS PANEL
+================================ */
+
+.bus-panel {
+position: fixed;
+
+
+top: 85px;
+right: 20px;
+
+width: 360px;
+max-width: calc(100% - 40px);
+
+max-height: calc(100vh - 105px);
+
+overflow-y: auto;
+
+background: rgba(10, 15, 25, 0.96);
+backdrop-filter: blur(15px);
+
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 16px;
+
+padding: 20px;
+
+z-index: 1001;
+
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+
+
+}
+
+/* Hidden state */
+
+.bus-panel.hidden {
+display: none;
+}
+
+/* ================================
+CLOSE BUTTON
+================================ */
+
+.minimize-btn {
+position: absolute;
+
+
+top: 12px;
+right: 12px;
+
+width: 32px;
+height: 32px;
+
+border: none;
+border-radius: 50%;
+
+background: rgba(255, 255, 255, 0.1);
+color: white;
+
+font-size: 20px;
+
+cursor: pointer;
+
+
+}
+
+.minimize-btn:hover {
+background: rgba(255, 255, 255, 0.2);
+}
+
+/* ================================
+MOBILE
+================================ */
+
+@media (max-width: 600px) {
+
+
+.map-header {
+    height: 62px;
+    padding: 0 12px;
+}
+
+.map-header h1 {
+    font-size: 15px;
+}
+
+.back-home {
+    font-size: 13px;
+}
+
+.bus-status-nav {
+    padding: 8px 11px;
+    font-size: 12px;
+}
+
+.bus-panel {
+    top: 72px;
+    right: 10px;
+
+    width: calc(100% - 20px);
+    max-width: none;
+
+    padding: 15px;
+}
+
+}
