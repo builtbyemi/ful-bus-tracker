@@ -50,12 +50,27 @@ const felele = [
 // MAP
 // =====================================================
 
-const map =
-    L.map("map").setView(
-        [7.828, 6.706],
-        13
-    );
+const map = L.map("map", {
+    minZoom: 13,
+    maxZoom: 18,
 
+    maxBounds: [
+        [7.77, 6.65],
+        [7.89, 6.75]
+    ],
+
+    maxBoundsViscosity: 1.0,
+
+    zoomControl: true
+}).setView(
+    [7.828, 6.706],
+    13
+);
+
+
+// =====================================================
+// MAP TILES
+// =====================================================
 
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -69,102 +84,178 @@ L.tileLayer(
 
 
 // =====================================================
+// MAP SCALE
+// =====================================================
+
+L.control.scale({
+    imperial: false
+}).addTo(map);
+
+
+// =====================================================
 // LOCATION ICON
 // =====================================================
 
-const locationIcon =
-    L.divIcon({
+const locationIcon = L.divIcon({
 
-        className:
-            "location-marker",
+    className:
+        "location-marker",
 
-        html: `
-            <div style="
-                background:#087b80;
-                color:white;
-                width:34px;
-                height:34px;
-                border-radius:50%;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border:3px solid white;
-                box-shadow:0 4px 12px rgba(0,0,0,.3);
-                font-size:16px;
-            ">
-                📍
-            </div>
-        `,
+    html: `
+        <div style="
+            background:#087b80;
+            color:white;
+            width:34px;
+            height:34px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:3px solid white;
+            box-shadow:0 4px 12px rgba(0,0,0,.3);
+            font-size:16px;
+        ">
+            📍
+        </div>
+    `,
 
-        iconSize: [
-            34,
-            34
-        ],
+    iconSize: [
+        34,
+        34
+    ],
 
-        iconAnchor: [
-            17,
-            17
-        ]
-    });
+    iconAnchor: [
+        17,
+        17
+    ]
+});
+
+
+// =====================================================
+// ROUTE POINT ICON
+// =====================================================
+
+const routePointIcon = L.divIcon({
+
+    className:
+        "route-point-marker",
+
+    html: `
+        <div style="
+            width:18px;
+            height:18px;
+            background:#ffffff;
+            border:4px solid #087b80;
+            border-radius:50%;
+            box-shadow:0 3px 10px rgba(0,0,0,.3);
+        "></div>
+    `,
+
+    iconSize: [
+        18,
+        18
+    ],
+
+    iconAnchor: [
+        9,
+        9
+    ]
+});
 
 
 // =====================================================
 // IMPORTANT PLACES
 // =====================================================
 
+// ADANKOLO
+
 L.marker(
     adankolo,
     {
-        icon:
-            locationIcon
+        icon: locationIcon
     }
 )
 .addTo(map)
 .bindPopup(`
-    <strong>
-        College of Health Sciences
-    </strong>
+    <div style="min-width:190px;">
 
-    <br>
+        <strong style="font-size:16px;">
+            College of Health Sciences
+        </strong>
 
-    Adankolo
+        <br>
 
-    <br><br>
+        Adankolo
 
-    <span style="color:#087b80;">
-        FUL Bus Route
-    </span>
+        <br><br>
+
+        <span style="color:#087b80;font-weight:700;">
+            🚌 FUL Bus Route Start
+        </span>
+
+    </div>
 `);
 
+
+// ROUTE CHECKPOINT
+
+L.marker(
+    routePoint,
+    {
+        icon: routePointIcon
+    }
+)
+.addTo(map)
+.bindPopup(`
+    <div style="min-width:180px;">
+
+        <strong style="font-size:15px;">
+            FUL Bus Route
+        </strong>
+
+        <br><br>
+
+        📍 Route checkpoint
+
+    </div>
+`);
+
+
+// FELELE CAMPUS
 
 L.marker(
     felele,
     {
-        icon:
-            locationIcon
+        icon: locationIcon
     }
 )
 .addTo(map)
 .bindPopup(`
-    <strong>
-        Federal University Lokoja
-    </strong>
+    <div style="min-width:190px;">
 
-    <br>
+        <strong style="font-size:16px;">
+            Federal University Lokoja
+        </strong>
 
-    Felele Campus
+        <br>
 
-    <br><br>
+        Felele Campus
 
-    <span style="color:#087b80;">
-        FUL Bus Destination
-    </span>
+        <br><br>
+
+        <span style="color:#087b80;font-weight:700;">
+            🚌 FUL Bus Destination
+        </span>
+
+    </div>
 `);
 
 
 // =====================================================
 // ROUTE
 // =====================================================
+
+let routeCoordinates = [];
 
 async function loadRoute() {
 
@@ -211,7 +302,7 @@ async function loadRoute() {
                 .coordinates;
 
 
-        const route =
+        routeCoordinates =
             coordinates.map(
                 ([lng, lat]) => [
                     lat,
@@ -220,24 +311,37 @@ async function loadRoute() {
             );
 
 
+        // =================================================
+        // ROUTE OUTLINE
+        // =================================================
+
         L.polyline(
-            route,
+            routeCoordinates,
             {
-                color:
-                    "#087b80",
+                color: "#ffffff",
+                weight: 10,
+                opacity: 0.65
+            }
+        ).addTo(map);
 
-                weight:
-                    6,
 
-                opacity:
-                    0.85
+        // =================================================
+        // MAIN ROUTE
+        // =================================================
+
+        L.polyline(
+            routeCoordinates,
+            {
+                color: "#087b80",
+                weight: 6,
+                opacity: 0.95
             }
         ).addTo(map);
 
 
         console.log(
-            "✅ FUL route loaded:",
-            route.length,
+            "✅ FUL road route loaded:",
+            routeCoordinates.length,
             "points"
         );
 
@@ -255,7 +359,7 @@ loadRoute();
 
 
 // =====================================================
-// BUS ICON
+// BUS ICON SIZE
 // =====================================================
 
 function getBusSize() {
@@ -279,6 +383,10 @@ function getBusSize() {
 }
 
 
+// =====================================================
+// BUS ICON
+// =====================================================
+
 function createBusIcon(
     size,
     rotation = 0
@@ -301,7 +409,7 @@ function createBusIcon(
                     transform:rotate(${rotation}deg);
                     transform-origin:center center;
                     filter:drop-shadow(
-                        0 2px 4px rgba(0,0,0,.35)
+                        0 3px 5px rgba(0,0,0,.4)
                     );
                 "
             >
@@ -324,13 +432,17 @@ function createBusIcon(
 // BUS DATA
 // =====================================================
 
-// Stores every bus currently known by Firebase
-
 const busMarkers = {};
 
 let currentBusData = {};
 
-let selectedBusId = "FUL-001";
+let selectedBusId =
+    "FUL-001";
+
+
+// Stores the latest direction of each bus
+
+const busBearings = {};
 
 
 // =====================================================
@@ -433,6 +545,10 @@ function removeBusMarker(
             busId
         ];
 
+        delete busBearings[
+            busId
+        ];
+
         console.log(
             `🗑️ ${busId} removed from map`
         );
@@ -456,8 +572,7 @@ async function getPlaceName(
 
 
     if (
-        now - lastGeocodeTime <
-        15000
+        now - lastGeocodeTime < 15000
     ) {
 
         return null;
@@ -632,7 +747,7 @@ function createBusPopup(
 
 
     return `
-        <div style="min-width:180px;">
+        <div style="min-width:200px;">
 
             <strong style="font-size:16px;">
                 🚌 ${busId}
@@ -640,8 +755,11 @@ function createBusPopup(
 
             <br><br>
 
-            <span style="color:#20a866;">
-                ● LIVE
+            <span
+                id="busLiveStatus-${busId}"
+                style="color:#20a866;font-weight:700;"
+           >
+              ● LIVE
             </span>
 
             <br><br>
@@ -659,26 +777,50 @@ function createBusPopup(
     `;
 }
 
+function isBusStale(bus) {
+
+    if (!bus) {
+        return true;
+    }
+
+    // Use lastGpsUpdate if available.
+    // Fall back to timestamp for compatibility.
+    const gpsTime =
+        bus.lastGpsUpdate ??
+        bus.timestamp;
+
+    if (!gpsTime) {
+        return true;
+    }
+
+    const age =
+        Date.now() -
+        Number(gpsTime);
+
+    // Bus is considered stale after 15 seconds
+    return age > 15000;
+}
+
 
 // =====================================================
 // UPDATE / CREATE BUS
 // =====================================================
-
 function updateBusMarker(
     busId,
     bus
 ) {
 
     if (
-        !isBusOnline(bus)
-    ) {
+    !bus ||
+    bus.status !== "ONLINE" ||
+    bus.latitude === null ||
+    bus.longitude === null
+) {
+    removeBusMarker(busId);
+    return;
+}
 
-        removeBusMarker(
-            busId
-        );
-
-        return;
-    }
+const stale = isBusStale(bus);
 
 
     const position = [
@@ -709,7 +851,10 @@ function updateBusMarker(
                     icon:
                         createBusIcon(
                             getBusSize()
-                        )
+                        ),
+
+                    zIndexOffset:
+                        1000
                 }
             ).addTo(map);
 
@@ -724,6 +869,11 @@ function updateBusMarker(
         busMarkers[
             busId
         ] = marker;
+
+
+        busBearings[
+            busId
+        ] = 0;
 
 
         console.log(
@@ -766,11 +916,25 @@ function updateBusMarker(
     ];
 
 
-    const bearing =
-        getBearing(
-            previous,
-            position
-        );
+    // Only calculate direction if
+    // the bus actually moved
+
+    if (
+        previous[0] !== position[0] ||
+        previous[1] !== position[1]
+    ) {
+
+        const bearing =
+            getBearing(
+                previous,
+                position
+            );
+
+
+        busBearings[
+            busId
+        ] = bearing;
+    }
 
 
     marker.setLatLng(
@@ -781,7 +945,7 @@ function updateBusMarker(
     marker.setIcon(
         createBusIcon(
             getBusSize(),
-            bearing
+            busBearings[busId] || 0
         )
     );
 
@@ -827,6 +991,23 @@ onValue(
 
         currentBusData =
             buses;
+
+
+    // =====================================================
+// CHECK FOR STALE BUSES
+// =====================================================
+
+setInterval(() => {
+
+    Object.keys(currentBusData).forEach((busId) => {
+
+        const bus = currentBusData[busId];
+
+        updateBusCard(busId, bus);
+
+    });
+
+}, 5000);
 
 
         // =============================================
@@ -909,7 +1090,8 @@ map.on(
 
                 marker.setIcon(
                     createBusIcon(
-                        getBusSize()
+                        getBusSize(),
+                        busBearings[busId] || 0
                     )
                 );
             }
@@ -990,9 +1172,38 @@ function updateSelectedBus() {
         "FUL Bus Route";
 }
 
+setInterval(() => {
+
+    Object.keys(
+        currentBusData
+    ).forEach(
+        (busId) => {
+
+            const bus =
+                currentBusData[busId];
+
+
+            updateBusCard(
+                busId,
+                bus
+            );
+
+
+            updateBusPopupStatus(
+                busId,
+                bus
+            );
+        }
+    );
+
+
+    updateSelectedBus();
+
+}, 10000);
+
 
 // =====================================================
-// MINIMIZE PANEL
+// TOGGLE BUS PANEL
 // =====================================================
 
 window.toggleBusPanel =
@@ -1004,46 +1215,60 @@ function() {
         );
 
 
-    const button =
-        document.querySelector(
-            ".minimize-btn"
-        );
-
-
-    if (
-        !panel ||
-        !button
-    ) {
-
+    if (!panel) {
         return;
     }
 
 
     panel.classList.toggle(
-        "minimized"
+        "hidden"
     );
+};
+
+function updateBusPopupStatus(
+    busId,
+    bus
+) {
+
+    const element =
+        document.getElementById(
+            `busLiveStatus-${busId}`
+        );
+
+
+    if (!element) {
+        return;
+    }
 
 
     if (
-        panel.classList.contains(
-            "minimized"
-        )
+        isBusOnline(bus)
     ) {
 
-        button.textContent =
-            "+";
+        element.style.color =
+            "#20a866";
+
+        element.textContent =
+            "● LIVE";
+
+
+    } else if (
+        isBusStale(bus)
+    ) {
+
+        element.style.color =
+            "#f59e0b";
+
+        element.textContent =
+            "● GPS STALE";
+
 
     } else {
 
-        button.textContent =
-            "−";
+        element.style.color =
+            "#ef4444";
+
+        element.textContent =
+            "● OFFLINE";
     }
-};
-
-window.toggleBusPanel = function () {
-    const panel = document.querySelector(".bus-panel");
-
-    if (!panel) return;
-
-    panel.classList.toggle("hidden");
-};
+}

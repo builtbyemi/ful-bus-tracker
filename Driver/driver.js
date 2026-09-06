@@ -2,11 +2,13 @@
 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
 import {
     getDatabase,
     ref,
     set,
-    onValue
+    onValue,
+    onDisconnect
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
 
@@ -31,18 +33,28 @@ const database = getDatabase(app);
 // GET BUS FROM URL
 // ===============================
 
-const params = new URLSearchParams(window.location.search);
-const BUS_ID = params.get("bus");
+const params =
+    new URLSearchParams(window.location.search);
+
+const BUS_ID =
+    params.get("bus");
 
 
 // ===============================
 // HTML ELEMENTS
 // ===============================
 
-const driverSelection = document.getElementById("driverSelection");
-const loginSection = document.getElementById("loginSection");
-const dashboardSection = document.getElementById("dashboardSection");
-const assignedBus = document.getElementById("assignedBus");
+const driverSelection =
+    document.getElementById("driverSelection");
+
+const loginSection =
+    document.getElementById("loginSection");
+
+const dashboardSection =
+    document.getElementById("dashboardSection");
+
+const assignedBus =
+    document.getElementById("assignedBus");
 
 
 // ===============================
@@ -50,38 +62,79 @@ const assignedBus = document.getElementById("assignedBus");
 // ===============================
 
 const DRIVER_PASSWORDS = {
-    "FUL-001": "FulDriver001!",
-    "FUL-002": "FulDriver002!",
-    "FUL-003": "FulDriver003!"
+
+    "FUL-001":
+        "FulDriver001!",
+
+    "FUL-002":
+        "FulDriver002!",
+
+    "FUL-003":
+        "FulDriver003!"
+
 };
 
-const DRIVER_PASSWORD = DRIVER_PASSWORDS[BUS_ID];
+const DRIVER_PASSWORD =
+    DRIVER_PASSWORDS[BUS_ID];
+
+
+// ===============================
+// GPS SETTINGS
+// ===============================
+
+const GPS_MAX_AGE =
+    5000;
+
+const GPS_TIMEOUT =
+    30000;
+
+
+// ===============================
+// TRIP STATE
+// ===============================
+
+// True only while the driver has an active trip.
+
+let tripActive =
+    false;
 
 
 // ===============================
 // SHOW CORRECT SCREEN
 // ===============================
 
-if (BUS_ID && DRIVER_PASSWORD) {
+if (
+    BUS_ID &&
+    DRIVER_PASSWORD
+) {
 
-    // Hide bus selection
-    driverSelection.classList.add("hidden");
+    driverSelection.classList.add(
+        "hidden"
+    );
 
-    // Show login
-    loginSection.classList.remove("hidden");
+    loginSection.classList.remove(
+        "hidden"
+    );
 
-    // Show assigned bus
     if (assignedBus) {
-        assignedBus.textContent = BUS_ID;
+
+        assignedBus.textContent =
+            BUS_ID;
     }
 
 } else {
 
-    // No bus selected
-    driverSelection.classList.remove("hidden");
-    loginSection.classList.add("hidden");
-    dashboardSection.classList.add("hidden");
+    driverSelection.classList.remove(
+        "hidden"
+    );
 
+    loginSection.classList.add(
+        "hidden"
+    );
+
+    dashboardSection.classList.add(
+        "hidden"
+    );
 }
 
 
@@ -89,9 +142,13 @@ if (BUS_ID && DRIVER_PASSWORD) {
 // FIREBASE BUS REFERENCE
 // ===============================
 
-const busRef = BUS_ID
-    ? ref(database, `buses/${BUS_ID}`)
-    : null;
+const busRef =
+    BUS_ID
+        ? ref(
+            database,
+            `buses/${BUS_ID}`
+        )
+        : null;
 
 
 // ===============================
@@ -100,56 +157,90 @@ const busRef = BUS_ID
 
 function checkPasswordRequirements() {
 
-    const passwordInput = document.getElementById("password");
+    const passwordInput =
+        document.getElementById("password");
 
     if (!passwordInput) return;
 
-    const password = passwordInput.value;
+    const password =
+        passwordInput.value;
 
     const requirements = {
 
-        length: password.length >= 8,
+        length:
+            password.length >= 8,
 
-        uppercase: /[A-Z]/.test(password),
+        uppercase:
+            /[A-Z]/.test(password),
 
-        lowercase: /[a-z]/.test(password),
+        lowercase:
+            /[a-z]/.test(password),
 
-        number: /[0-9]/.test(password),
+        number:
+            /[0-9]/.test(password),
 
-        special: /[^A-Za-z0-9]/.test(password)
+        special:
+            /[^A-Za-z0-9]/.test(password)
 
     };
 
-    updateRequirement("length", requirements.length);
-    updateRequirement("uppercase", requirements.uppercase);
-    updateRequirement("lowercase", requirements.lowercase);
-    updateRequirement("number", requirements.number);
-    updateRequirement("special", requirements.special);
+    updateRequirement(
+        "length",
+        requirements.length
+    );
+
+    updateRequirement(
+        "uppercase",
+        requirements.uppercase
+    );
+
+    updateRequirement(
+        "lowercase",
+        requirements.lowercase
+    );
+
+    updateRequirement(
+        "number",
+        requirements.number
+    );
+
+    updateRequirement(
+        "special",
+        requirements.special
+    );
 }
 
 
-function updateRequirement(id, passed) {
+function updateRequirement(
+    id,
+    passed
+) {
 
-    const element = document.getElementById(id);
+    const element =
+        document.getElementById(id);
 
     if (!element) return;
 
     if (passed) {
 
         element.textContent =
-            "✓ " + getRequirementText(id);
+            "✓ " +
+            getRequirementText(id);
 
-        element.classList.add("valid");
+        element.classList.add(
+            "valid"
+        );
 
     } else {
 
         element.textContent =
-            "✕ " + getRequirementText(id);
+            "✕ " +
+            getRequirementText(id);
 
-        element.classList.remove("valid");
-
+        element.classList.remove(
+            "valid"
+        );
     }
-
 }
 
 
@@ -157,32 +248,37 @@ function getRequirementText(id) {
 
     const texts = {
 
-        length: "At least 8 characters",
+        length:
+            "At least 8 characters",
 
-        uppercase: "One uppercase letter",
+        uppercase:
+            "One uppercase letter",
 
-        lowercase: "One lowercase letter",
+        lowercase:
+            "One lowercase letter",
 
-        number: "One number",
+        number:
+            "One number",
 
-        special: "One special character"
+        special:
+            "One special character"
 
     };
 
     return texts[id];
-
 }
 
 
-// Make available to HTML
-window.checkPasswordRequirements = checkPasswordRequirements;
+window.checkPasswordRequirements =
+    checkPasswordRequirements;
 
 
 // ===============================
 // SHOW / HIDE PASSWORD
 // ===============================
 
-window.togglePassword = function () {
+window.togglePassword =
+function () {
 
     const password =
         document.getElementById("password");
@@ -190,14 +286,18 @@ window.togglePassword = function () {
     const toggle =
         document.querySelector(".toggle-password");
 
-    if (!password || !toggle) return;
+    if (
+        !password ||
+        !toggle
+    ) return;
 
+    if (
+        password.type === "password"
+    ) {
 
-    if (password.type === "password") {
+        password.type =
+            "text";
 
-        password.type = "text";
-
-        // Eye with slash
         toggle.innerHTML = `
             <svg
                 viewBox="0 0 24 24"
@@ -223,9 +323,9 @@ window.togglePassword = function () {
 
     } else {
 
-        password.type = "password";
+        password.type =
+            "password";
 
-        // Normal eye
         toggle.innerHTML = `
             <svg
                 viewBox="0 0 24 24"
@@ -246,9 +346,7 @@ window.togglePassword = function () {
             "aria-label",
             "Show password"
         );
-
     }
-
 };
 
 
@@ -256,7 +354,8 @@ window.togglePassword = function () {
 // LOGIN
 // ===============================
 
-window.login = function () {
+window.login =
+function () {
 
     const passwordInput =
         document.getElementById("password");
@@ -264,189 +363,449 @@ window.login = function () {
     const message =
         document.getElementById("loginMessage");
 
-    if (!passwordInput || !message) return;
+    if (
+        !passwordInput ||
+        !message
+    ) return;
 
-    const password = passwordInput.value;
-
+    const password =
+        passwordInput.value;
 
     if (!DRIVER_PASSWORD) {
 
-        message.className = "error-message";
+        message.className =
+            "error-message";
 
         message.textContent =
             "⚠ Invalid driver account.";
 
         return;
-
     }
 
+    if (
+        password ===
+        DRIVER_PASSWORD
+    ) {
 
-    if (password === DRIVER_PASSWORD) {
-
-        message.className = "success-message";
+        message.className =
+            "success-message";
 
         message.textContent =
             "✓ Login successful";
 
+        setTimeout(
+            () => {
 
-        setTimeout(() => {
+                loginSection.classList.add(
+                    "hidden"
+                );
 
-            loginSection.classList.add("hidden");
+                dashboardSection.classList.remove(
+                    "hidden"
+                );
 
-            dashboardSection.classList.remove("hidden");
+                restoreTripState();
 
-            restoreTripState();
-
-        }, 500);
-
+            },
+            500
+        );
 
     } else {
 
-        message.className = "error-message";
+        message.className =
+            "error-message";
 
         message.textContent =
             "⚠ Incorrect password. Please try again.";
-
     }
-
 };
 
 
 // ===============================
-// GPS
+// GPS WATCHER
 // ===============================
 
-let watchID = null;
+let watchID =
+    null;
 
+
+// ===============================
+// WRITE OFFLINE STATE
+// ===============================
+
+async function writeOfflineState() {
+
+    if (!busRef) return;
+
+    try {
+
+        await set(
+            busRef,
+            {
+
+                busId:
+                    BUS_ID,
+
+                status:
+                    "OFFLINE",
+
+                tripStarted:
+                    false,
+
+                latitude:
+                    null,
+
+                longitude:
+                    null,
+
+                timestamp:
+                    Date.now(),
+
+                lastGpsUpdate:
+                    null
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Could not set offline:",
+            error
+        );
+    }
+}
+
+
+// ===============================
+// REGISTER DISCONNECT HANDLER
+// ===============================
+
+async function registerDisconnectHandler() {
+
+    if (!busRef) return;
+
+    try {
+
+        await onDisconnect(
+            busRef
+        ).set({
+
+            busId:
+                BUS_ID,
+
+            status:
+                "OFFLINE",
+
+            tripStarted:
+                false,
+
+            latitude:
+                null,
+
+            longitude:
+                null,
+
+            timestamp:
+                Date.now(),
+
+            lastGpsUpdate:
+                null
+
+        });
+
+        console.log(
+            "✅ Firebase disconnect handler registered."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Disconnect handler error:",
+            error
+        );
+    }
+}
+
+
+// ===============================
+// START GPS
+// ===============================
 
 function startGPS() {
 
-    if (!navigator.geolocation) {
+    if (
+        !navigator.geolocation
+    ) {
 
         alert(
             "Your browser does not support GPS."
         );
 
         return;
-
     }
 
 
-    if (watchID !== null) return;
+    // Clear the previous watcher.
+
+    if (
+        watchID !== null
+    ) {
+
+        navigator.geolocation.clearWatch(
+            watchID
+        );
+
+        watchID =
+            null;
+    }
 
 
-    document.getElementById("status").textContent =
-        "LOCATING...";
+    const status =
+        document.getElementById("status");
 
-    document.getElementById("latitude").textContent =
-        "Getting location...";
+    const latitudeElement =
+        document.getElementById("latitude");
 
-    document.getElementById("longitude").textContent =
-        "Getting location...";
-
-
-    watchID = navigator.geolocation.watchPosition(
-
-        async (position) => {
-
-            const latitude =
-                position.coords.latitude;
-
-            const longitude =
-                position.coords.longitude;
+    const longitudeElement =
+        document.getElementById("longitude");
 
 
-            document.getElementById("status").textContent =
-                "ONLINE";
+    if (status) {
 
-            document.getElementById("latitude").textContent =
-                latitude.toFixed(6);
+        status.textContent =
+            "LOCATING...";
+    }
 
-            document.getElementById("longitude").textContent =
-                longitude.toFixed(6);
+    if (latitudeElement) {
+
+        latitudeElement.textContent =
+            "Getting location...";
+    }
+
+    if (longitudeElement) {
+
+        longitudeElement.textContent =
+            "Getting location...";
+    }
 
 
-            document
-                .getElementById("startButton")
-                .classList.add("hidden");
-
-            document
-                .getElementById("stopButton")
-                .classList.remove("hidden");
+    console.log(
+        "📡 Starting GPS watcher..."
+    );
 
 
-            try {
+    watchID =
+        navigator.geolocation.watchPosition(
 
-                await set(busRef, {
+            async (position) => {
 
-                    busId: BUS_ID,
+                // Ignore GPS updates if
+                // the driver has already
+                // stopped the trip.
 
-                    status: "ONLINE",
+                if (!tripActive) {
+                    return;
+                }
 
-                    tripStarted: true,
 
-                    latitude: latitude,
+                const latitude =
+                    position.coords.latitude;
 
-                    longitude: longitude,
+                const longitude =
+                    position.coords.longitude;
 
-                    timestamp: Date.now()
+                const gpsTimestamp =
+                    Date.now();
 
-                });
 
-            } catch (error) {
+                if (status) {
 
-                console.error(
-                    "Firebase error:",
+                    status.textContent =
+                        "ONLINE";
+                }
+
+                if (latitudeElement) {
+
+                    latitudeElement.textContent =
+                        latitude.toFixed(6);
+                }
+
+                if (longitudeElement) {
+
+                    longitudeElement.textContent =
+                        longitude.toFixed(6);
+                }
+
+
+                const startButton =
+                    document.getElementById(
+                        "startButton"
+                    );
+
+                const stopButton =
+                    document.getElementById(
+                        "stopButton"
+                    );
+
+
+                if (startButton) {
+
+                    startButton.classList.add(
+                        "hidden"
+                    );
+                }
+
+                if (stopButton) {
+
+                    stopButton.classList.remove(
+                        "hidden"
+                    );
+                }
+
+
+                if (!busRef) {
+                    return;
+                }
+
+
+                try {
+
+                    await set(
+                        busRef,
+                        {
+
+                            busId:
+                                BUS_ID,
+
+                            status:
+                                "ONLINE",
+
+                            tripStarted:
+                                true,
+
+                            latitude:
+                                latitude,
+
+                            longitude:
+                                longitude,
+
+                            timestamp:
+                                gpsTimestamp,
+
+                            lastGpsUpdate:
+                                gpsTimestamp,
+
+                            accuracy:
+                                position.coords.accuracy ?? null
+
+                        }
+                    );
+
+
+                    console.log(
+                        "📍 GPS update:",
+                        latitude,
+                        longitude
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Firebase GPS error:",
+                        error
+                    );
+                }
+
+            },
+
+
+            (error) => {
+
+                console.log(
+                    "GPS Error:",
                     error
                 );
 
+
+                const status =
+                    document.getElementById(
+                        "status"
+                    );
+
+
+                if (status) {
+
+                    status.textContent =
+                        "GPS ERROR";
+                }
+
+
+                if (
+                    error.code === 1
+                ) {
+
+                    alert(
+                        "Location permission was denied. Please allow location access."
+                    );
+
+                } else if (
+                    error.code === 2
+                ) {
+
+                    console.log(
+                        "Location unavailable. Retrying..."
+                    );
+
+                } else if (
+                    error.code === 3
+                ) {
+
+                    console.log(
+                        "GPS timed out. Retrying..."
+                    );
+                }
+
+
+                // If the trip is still active,
+                // retry GPS automatically.
+
+                if (tripActive) {
+
+                    setTimeout(
+                        () => {
+
+                            if (
+                                tripActive
+                            ) {
+
+                                console.log(
+                                    "🔄 Restarting GPS..."
+                                );
+
+                                startGPS();
+                            }
+
+                        },
+                        3000
+                    );
+                }
+            },
+
+
+            {
+
+                enableHighAccuracy:
+                    true,
+
+                maximumAge:
+                    GPS_MAX_AGE,
+
+                timeout:
+                    GPS_TIMEOUT
             }
-
-        },
-
-
-        (error) => {
-
-            console.log(
-                "GPS Error:",
-                error
-            );
-
-            document.getElementById("status").textContent =
-                "GPS ERROR";
-
-
-            if (error.code === 1) {
-
-                alert(
-                    "Location permission was denied. Please allow location access."
-                );
-
-            } else if (error.code === 2) {
-
-                alert(
-                    "Your location could not be determined."
-                );
-
-            } else if (error.code === 3) {
-
-                alert(
-                    "GPS request timed out. Please try again."
-                );
-
-            }
-
-        },
-
-
-        {
-            enableHighAccuracy: false,
-            maximumAge: 10000,
-            timeout: 60000
-        }
-
-    );
-
+        );
 }
 
 
@@ -454,38 +813,62 @@ function startGPS() {
 // START TRIP
 // ===============================
 
-window.startTrip = async function () {
+window.startTrip =
+async function () {
 
     if (!busRef) return;
 
 
     try {
 
-        await set(busRef, {
+        tripActive =
+            true;
 
-            busId: BUS_ID,
 
-            status: "ONLINE",
+        await set(
+            busRef,
+            {
 
-            tripStarted: true,
+                busId:
+                    BUS_ID,
 
-            latitude: null,
+                status:
+                    "ONLINE",
 
-            longitude: null,
+                tripStarted:
+                    true,
 
-            timestamp: Date.now()
+                latitude:
+                    null,
 
-        });
+                longitude:
+                    null,
+
+                timestamp:
+                    Date.now(),
+
+                lastGpsUpdate:
+                    null
+
+            }
+        );
+
+
+        await registerDisconnectHandler();
 
 
         console.log(
             `${BUS_ID} trip started.`
         );
 
+
         startGPS();
 
 
     } catch (error) {
+
+        tripActive =
+            false;
 
         console.error(
             "Could not start trip:",
@@ -495,9 +878,7 @@ window.startTrip = async function () {
         alert(
             "Could not start trip. Please try again."
         );
-
     }
-
 };
 
 
@@ -516,7 +897,9 @@ function restoreTripState() {
 
         (snapshot) => {
 
-            const bus = snapshot.val();
+            const bus =
+                snapshot.val();
+
 
             if (!bus) return;
 
@@ -526,18 +909,46 @@ function restoreTripState() {
                 bus.status === "ONLINE"
             ) {
 
-                document.getElementById("status").textContent =
-                    "ONLINE";
+                tripActive =
+                    true;
 
 
-                document
-                    .getElementById("startButton")
-                    .classList.add("hidden");
+                const status =
+                    document.getElementById(
+                        "status"
+                    );
+
+                const startButton =
+                    document.getElementById(
+                        "startButton"
+                    );
+
+                const stopButton =
+                    document.getElementById(
+                        "stopButton"
+                    );
 
 
-                document
-                    .getElementById("stopButton")
-                    .classList.remove("hidden");
+                if (status) {
+
+                    status.textContent =
+                        "ONLINE";
+                }
+
+
+                if (startButton) {
+
+                    startButton.classList.add(
+                        "hidden"
+                    );
+                }
+
+                if (stopButton) {
+
+                    stopButton.classList.remove(
+                        "hidden"
+                    );
+                }
 
 
                 if (
@@ -545,83 +956,221 @@ function restoreTripState() {
                     bus.longitude !== null
                 ) {
 
-                    document.getElementById("latitude").textContent =
-                        Number(bus.latitude).toFixed(6);
+                    const latitude =
+                        document.getElementById(
+                            "latitude"
+                        );
 
-                    document.getElementById("longitude").textContent =
-                        Number(bus.longitude).toFixed(6);
+                    const longitude =
+                        document.getElementById(
+                            "longitude"
+                        );
 
+
+                    if (latitude) {
+
+                        latitude.textContent =
+                            Number(
+                                bus.latitude
+                            ).toFixed(6);
+                    }
+
+                    if (longitude) {
+
+                        longitude.textContent =
+                            Number(
+                                bus.longitude
+                            ).toFixed(6);
+                    }
                 }
 
 
+                registerDisconnectHandler();
+
                 startGPS();
-
             }
-
         }
-
     );
-
 }
+
+
+// ===============================
+// PAGE VISIBILITY
+// ===============================
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            console.log(
+                "👀 Driver page visible — refreshing GPS..."
+            );
+
+
+            // If there is an active trip,
+            // always restart the GPS watcher.
+
+            if (
+                busRef &&
+                tripActive
+            ) {
+
+                startGPS();
+            }
+        }
+    }
+);
+
+
+// ===============================
+// PAGE FOCUS
+// ===============================
+
+window.addEventListener(
+    "focus",
+    () => {
+
+        if (
+            busRef &&
+            tripActive
+        ) {
+
+            console.log(
+                "🔄 Driver page focused — refreshing GPS..."
+            );
+
+            startGPS();
+        }
+    }
+);
 
 
 // ===============================
 // STOP TRIP
 // ===============================
 
-window.stopTrip = async function () {
+window.stopTrip =
+async function () {
 
     if (!busRef) return;
 
 
-    if (watchID !== null) {
+    // Stop the trip first so
+    // incoming GPS callbacks
+    // are ignored.
+
+    tripActive =
+        false;
+
+
+    if (
+        watchID !== null
+    ) {
 
         navigator.geolocation.clearWatch(
             watchID
         );
 
-        watchID = null;
-
+        watchID =
+            null;
     }
 
 
-    document.getElementById("status").textContent =
-        "OFFLINE";
+    const status =
+        document.getElementById(
+            "status"
+        );
 
-    document.getElementById("latitude").textContent =
-        "--";
+    const latitude =
+        document.getElementById(
+            "latitude"
+        );
 
-    document.getElementById("longitude").textContent =
-        "--";
+    const longitude =
+        document.getElementById(
+            "longitude"
+        );
 
 
-    document
-        .getElementById("startButton")
-        .classList.remove("hidden");
+    if (status) {
+
+        status.textContent =
+            "OFFLINE";
+    }
+
+    if (latitude) {
+
+        latitude.textContent =
+            "--";
+    }
+
+    if (longitude) {
+
+        longitude.textContent =
+            "--";
+    }
 
 
-    document
-        .getElementById("stopButton")
-        .classList.add("hidden");
+    const startButton =
+        document.getElementById(
+            "startButton"
+        );
+
+    const stopButton =
+        document.getElementById(
+            "stopButton"
+        );
+
+
+    if (startButton) {
+
+        startButton.classList.remove(
+            "hidden"
+        );
+    }
+
+    if (stopButton) {
+
+        stopButton.classList.add(
+            "hidden"
+        );
+    }
 
 
     try {
 
-        await set(busRef, {
+        await set(
+            busRef,
+            {
 
-            busId: BUS_ID,
+                busId:
+                    BUS_ID,
 
-            status: "OFFLINE",
+                status:
+                    "OFFLINE",
 
-            tripStarted: false,
+                tripStarted:
+                    false,
 
-            latitude: null,
+                latitude:
+                    null,
 
-            longitude: null,
+                longitude:
+                    null,
 
-            timestamp: Date.now()
+                timestamp:
+                    Date.now(),
 
-        });
+                lastGpsUpdate:
+                    null
+
+            }
+        );
 
 
         console.log(
@@ -632,10 +1181,8 @@ window.stopTrip = async function () {
     } catch (error) {
 
         console.error(
-            "Firebase error:",
+            "Firebase stop error:",
             error
         );
-
     }
-
 };
