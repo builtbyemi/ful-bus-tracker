@@ -897,28 +897,49 @@ MOBILE
 .back-home {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
 
-    padding: 10px 18px;
+    padding: 10px 16px;
 
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.10);
     color: #ffffff;
 
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 12px;
 
     text-decoration: none;
 
     font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0.2px;
 
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 
-    transition: background 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .back-home:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: #ffffff;
+    color: #087b80;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.back-home:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.back-home::first-letter {
+    font-size: 17px;
 }
 
 /* =========================================
