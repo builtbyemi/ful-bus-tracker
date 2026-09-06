@@ -142,9 +142,7 @@ if (BUS_ID && DRIVER_PASSWORD) {
 // ===============================
 
 function setDriverStatus(state) {
-
-    const status =
-        document.getElementById("status");
+    const status = document.getElementById("status");
 
     if (!status) return;
 
@@ -155,21 +153,15 @@ function setDriverStatus(state) {
     );
 
     if (state === "ONLINE") {
-
         status.textContent = "ONLINE";
-
         status.classList.add("online");
 
     } else if (state === "OFFLINE") {
-
         status.textContent = "OFFLINE";
-
         status.classList.add("offline");
 
     } else {
-
         status.textContent = state;
-
         status.classList.add("warning");
     }
 }
