@@ -14,7 +14,7 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB2c9YvF7vdRglr7KJKnbcmMb8ce06al4c",
+    apiKey: "AIzaSyB2c9YvF7vdRgl7rKJKnbcmMb8ce06al4c",
     authDomain: "ful-bus-tracker.firebaseapp.com",
     projectId: "ful-bus-tracker",
     storageBucket: "ful-bus-tracker.firebasestorage.app",
@@ -24,6 +24,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+
+
+// =====================================================
+// SETTINGS
+// =====================================================
+
+// Driver heartbeat is expected every 5 seconds.
+// If we don't receive one for 15 seconds,
+// the driver is considered offline.
+const HEARTBEAT_TIMEOUT = 15000;
+
+// GPS freshness is tracked separately.
+// GPS can be stale without making the bus offline.
+const GPS_FRESH_TIMEOUT = 30000;
 
 
 // =====================================================
@@ -90,7 +104,7 @@ L.control.scale({
 
 
 // =====================================================
-// LOWER ZOOM CONTROL
+// ZOOM CONTROL
 // =====================================================
 
 map.zoomControl.setPosition("topleft");
@@ -427,68 +441,137 @@ const busInfo = {
 
 
 // =====================================================
-// CHECK GPS STALE
+// TIMESTAMP HELPER
 // =====================================================
 
-function isBusStale(bus) {
+function getTimestamp(value) {
 
-    if (!bus) {
-        return true;
+    const timestamp =
+        Number(value);
+
+    if (!Number.isFinite(timestamp)) {
+        return null;
     }
 
-    const gpsTime =
-        bus.lastGpsUpdate ??
-        bus.timestamp;
+    return timestamp;
+}
 
-    if (!gpsTime) {
-        return true;
+
+// =====================================================
+// HEARTBEAT CHECK
+// =====================================================
+
+function isHeartbeatAlive(bus) {
+
+    if (!bus) {
+        return false;
+    }
+
+    const heartbeat =
+        getTimestamp(
+            bus.lastHeartbeat
+        );
+
+    if (heartbeat === null) {
+        return false;
     }
 
     const age =
-        Date.now() - Number(gpsTime);
+        Date.now() - heartbeat;
 
-    return age > 15000;
+    return (
+        age >= 0 &&
+        age <= HEARTBEAT_TIMEOUT
+    );
+}
+
+
+// =====================================================
+// GPS FRESHNESS
+// =====================================================
+
+function getGpsAge(bus) {
+
+    if (!bus) {
+        return null;
+    }
+
+    const gpsTimestamp =
+        getTimestamp(
+            bus.lastGpsUpdate
+        );
+
+    if (gpsTimestamp === null) {
+        return null;
+    }
+
+    const age =
+        Date.now() - gpsTimestamp;
+
+    if (age < 0) {
+        return 0;
+    }
+
+    return age;
+}
+
+
+function getGpsState(bus) {
+
+    const gpsAge =
+        getGpsAge(bus);
+
+    if (gpsAge === null) {
+        return "NO GPS";
+    }
+
+    if (
+        gpsAge <= GPS_FRESH_TIMEOUT
+    ) {
+        return "GPS FRESH";
+    }
+
+    return "GPS STALE";
 }
 
 
 // =====================================================
 // GET BUS STATE
 // =====================================================
+//
+// IMPORTANT:
+//
+// ONLINE/OFFLINE is controlled by:
+//     tripStarted + heartbeat
+//
+// GPS freshness is completely separate.
+//
+// GPS being stale WILL NOT make the bus PAUSED.
+// =====================================================
 
 function getBusState(bus) {
 
-    // No Firebase data
     if (!bus) {
         return "OFFLINE";
     }
 
-    // Driver is not currently on a trip
-    if (
-        bus.status !== "ONLINE" ||
-        bus.tripStarted !== true
-    ) {
+    // Trip is not active.
+    if (bus.tripStarted !== true) {
         return "OFFLINE";
     }
 
-    // Trip started but GPS hasn't provided coordinates yet
-    if (
-        bus.latitude === null ||
-        bus.longitude === null
-    ) {
+    // Driver heartbeat is dead.
+    if (!isHeartbeatAlive(bus)) {
         return "OFFLINE";
     }
 
-    // Driver is active but GPS stopped updating
-    if (isBusStale(bus)) {
-        return "PAUSED";
-    }
-
+    // Driver is alive and trip is active.
     return "ONLINE";
 }
 
 
 // =====================================================
-// CHECK FRESH ONLINE BUS
+// CHECK ONLINE BUS
 // =====================================================
 
 function isBusOnline(bus) {
@@ -519,8 +602,6 @@ function updateBusCard(
         getBusState(bus);
 
 
-    // ONLINE
-
     if (state === "ONLINE") {
 
         statusElement.className =
@@ -528,31 +609,16 @@ function updateBusCard(
 
         statusElement.innerHTML =
             "<span></span>ONLINE";
+
+        return;
     }
 
 
-    // PAUSED
+    statusElement.className =
+        "bus-status offline";
 
-    else if (state === "PAUSED") {
-
-        statusElement.className =
-            "bus-status paused";
-
-        statusElement.innerHTML =
-            "<span></span>PAUSED";
-    }
-
-
-    // OFFLINE
-
-    else {
-
-        statusElement.className =
-            "bus-status offline";
-
-        statusElement.innerHTML =
-            "<span></span>OFFLINE";
-    }
+    statusElement.innerHTML =
+        "<span></span>OFFLINE";
 }
 
 
@@ -741,7 +807,7 @@ function createBusPopup(
         "FUL Bus Route";
 
     return `
-        <div style="min-width:200px;">
+        <div style="min-width:210px;">
 
             <strong style="font-size:16px;">
                 🚌 ${busId}
@@ -757,6 +823,19 @@ function createBusPopup(
                 "
             >
                 ● ONLINE
+            </span>
+
+            <br>
+
+            <span
+                id="busGpsStatus-${busId}"
+                style="
+                    color:#087b80;
+                    font-size:13px;
+                    font-weight:600;
+                "
+            >
+                📡 GPS: Checking...
             </span>
 
             <br><br>
@@ -784,44 +863,80 @@ function updateBusPopupStatus(
     bus
 ) {
 
-    const element =
+    const liveElement =
         document.getElementById(
             `busLiveStatus-${busId}`
         );
 
-    if (!element) {
-        return;
+    const gpsElement =
+        document.getElementById(
+            `busGpsStatus-${busId}`
+        );
+
+
+    // -----------------------------
+    // DRIVER / TRIP STATUS
+    // -----------------------------
+
+    if (liveElement) {
+
+        const state =
+            getBusState(bus);
+
+        if (state === "ONLINE") {
+
+            liveElement.style.color =
+                "#20a866";
+
+            liveElement.textContent =
+                "● ONLINE";
+
+        } else {
+
+            liveElement.style.color =
+                "#ef4444";
+
+            liveElement.textContent =
+                "● OFFLINE";
+        }
     }
 
-    const state =
-        getBusState(bus);
 
+    // -----------------------------
+    // GPS STATUS
+    // -----------------------------
 
-    if (state === "ONLINE") {
+    if (gpsElement) {
 
-        element.style.color =
-            "#20a866";
+        const gpsState =
+            getGpsState(bus);
 
-        element.textContent =
-            "● ONLINE";
-    }
+        if (gpsState === "GPS FRESH") {
 
-    else if (state === "PAUSED") {
+            gpsElement.style.color =
+                "#087b80";
 
-        element.style.color =
-            "#f59e0b";
+            gpsElement.textContent =
+                "📡 GPS: FRESH";
 
-        element.textContent =
-            "● PAUSED";
-    }
+        } else if (
+            gpsState === "GPS STALE"
+        ) {
 
-    else {
+            gpsElement.style.color =
+                "#f59e0b";
 
-        element.style.color =
-            "#ef4444";
+            gpsElement.textContent =
+                "📡 GPS: STALE";
 
-        element.textContent =
-            "● OFFLINE";
+        } else {
+
+            gpsElement.style.color =
+                "#888";
+
+            gpsElement.textContent =
+                "📡 GPS: NO DATA";
+        }
     }
 }
 
@@ -835,15 +950,36 @@ function updateBusMarker(
     bus
 ) {
 
-    // Completely inactive bus
-    // gets removed from map.
+    // Only remove marker when the trip is
+    // actually inactive/offline or there
+    // is no usable location at all.
 
     if (
         !bus ||
         bus.status !== "ONLINE" ||
         bus.tripStarted !== true ||
         bus.latitude === null ||
-        bus.longitude === null
+        bus.longitude === null ||
+        bus.latitude === undefined ||
+        bus.longitude === undefined
+    ) {
+
+        removeBusMarker(busId);
+
+        return;
+    }
+
+
+    const latitude =
+        Number(bus.latitude);
+
+    const longitude =
+        Number(bus.longitude);
+
+
+    if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude)
     ) {
 
         removeBusMarker(busId);
@@ -853,14 +989,8 @@ function updateBusMarker(
 
 
     const position = [
-
-        Number(
-            bus.latitude
-        ),
-
-        Number(
-            bus.longitude
-        )
+        latitude,
+        longitude
     ];
 
 
@@ -889,6 +1019,19 @@ function updateBusMarker(
             createBusPopup(
                 busId
             )
+        );
+
+
+        // Refresh popup whenever it opens.
+        marker.on(
+            "popupopen",
+            () => {
+
+                updateBusPopupStatus(
+                    busId,
+                    currentBusData[busId]
+                );
+            }
         );
 
 
@@ -972,7 +1115,6 @@ function updateBusMarker(
     );
 
 
-    // Update popup status
     updateBusPopupStatus(
         busId,
         bus
@@ -1047,7 +1189,7 @@ onValue(
 
 
         // =============================================
-        // REMOVE BUSES THAT ARE TRULY OFFLINE
+        // REMOVE TRULY INACTIVE BUSES
         // =============================================
 
         Object.keys(busMarkers).forEach(
@@ -1061,7 +1203,9 @@ onValue(
                     bus.status !== "ONLINE" ||
                     bus.tripStarted !== true ||
                     bus.latitude === null ||
-                    bus.longitude === null
+                    bus.longitude === null ||
+                    bus.latitude === undefined ||
+                    bus.longitude === undefined
                 ) {
 
                     removeBusMarker(
@@ -1082,7 +1226,7 @@ onValue(
 
 
 // =====================================================
-// REFRESH STATUS EVERY 5 SECONDS
+// REFRESH STATUS
 // =====================================================
 
 setInterval(
@@ -1112,8 +1256,9 @@ setInterval(
 
 
         updateSelectedBus();
+
     },
-    5000
+    3000
 );
 
 
@@ -1205,37 +1350,38 @@ function updateSelectedBus() {
         getBusState(bus);
 
 
+    // =============================================
+    // ONLINE
+    // =============================================
+
     if (state === "ONLINE") {
 
-        selectedStatus.textContent =
-            "ONLINE";
-
-        selectedStatus.style.color =
-            "#20a866";
-    }
-
-    else if (state === "PAUSED") {
+        const gpsState =
+            getGpsState(bus);
 
         selectedStatus.textContent =
-            "PAUSED";
+            gpsState === "GPS STALE"
+                ? "ONLINE • GPS STALE"
+                : "ONLINE";
 
         selectedStatus.style.color =
-            "#f59e0b";
-    }
+            gpsState === "GPS STALE"
+                ? "#f59e0b"
+                : "#20a866";
 
-    else {
-
-        selectedStatus.textContent =
-            "OFFLINE";
-
-        selectedStatus.style.color =
-            "#ef4444";
+        return;
     }
 
 
-    selectedRoute.textContent =
-        busInfo[selectedBusId]?.route ||
-        "FUL Bus Route";
+    // =============================================
+    // OFFLINE
+    // =============================================
+
+    selectedStatus.textContent =
+        "OFFLINE";
+
+    selectedStatus.style.color =
+        "#ef4444";
 }
 
 
