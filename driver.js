@@ -101,6 +101,24 @@ let tripStarted = false;
 
 
 // ===============================
+// CURRENT GPS STATE
+// ===============================
+//
+// These MUST be global because the
+// heartbeat needs access to the latest
+// GPS coordinates.
+//
+
+let currentLatitude = null;
+
+let currentLongitude = null;
+
+let currentAccuracy = null;
+
+let lastGpsUpdate = null;
+
+
+// ===============================
 // FIREBASE BUS REFERENCE
 // ===============================
 
@@ -123,6 +141,7 @@ if (BUS_ID && DRIVER_PASSWORD) {
 
         assignedBus.textContent =
             BUS_ID;
+
     }
 
 } else {
@@ -481,19 +500,22 @@ let watchID = null;
 // HEARTBEAT
 // ===============================
 //
-// Heartbeat is completely separate
-// from GPS.
+// Heartbeat tells the student page:
 //
-// It answers:
-// "Is the driver page still alive
-// and is the trip still active?"
+// "The driver's trip is active and
+// the driver page is still alive."
 //
-// It does NOT depend on GPS.
-// ===============================
+// GPS freshness is separate.
+//
 
 async function sendHeartbeat() {
 
-    if (!busRef || !tripStarted) {
+    if (
+        !busRef ||
+        !tripStarted ||
+        currentLatitude === null ||
+        currentLongitude === null
+    ) {
         return;
     }
 
@@ -531,16 +553,34 @@ async function sendHeartbeat() {
 }
 
 
+// ===============================
+// START HEARTBEAT
+// ===============================
+
 function startHeartbeat() {
 
-    stopHeartbeat();
+    /*
+     * Don't create duplicate intervals.
+     */
+
+    if (
+        heartbeatInterval !== null
+    ) {
+        return;
+    }
 
 
-    // Send immediately.
+    /*
+     * Send immediately.
+     */
+
     sendHeartbeat();
 
 
-    // Then continue every 5 seconds.
+    /*
+     * Continue every 5 seconds.
+     */
+
     heartbeatInterval =
         setInterval(
             sendHeartbeat,
@@ -553,6 +593,10 @@ function startHeartbeat() {
     );
 }
 
+
+// ===============================
+// STOP HEARTBEAT
+// ===============================
 
 function stopHeartbeat() {
 
@@ -700,11 +744,6 @@ async function registerDisconnectHandler() {
 // ===============================
 // CANCEL DISCONNECT HANDLER
 // ===============================
-//
-// When the driver manually stops,
-// we don't want an old disconnect
-// handler hanging around.
-// ===============================
 
 async function cancelDisconnectHandler() {
 
@@ -773,6 +812,15 @@ function startGPS() {
         );
 
 
+    /*
+     * Important:
+     *
+     * Starting the trip does NOT mean
+     * ONLINE yet.
+     *
+     * We first locate the driver.
+     */
+
     setDriverStatus(
         "LOCATING..."
     );
@@ -807,22 +855,27 @@ function startGPS() {
                 }
 
 
-                const latitude =
+                /*
+                 * Save GPS globally so the
+                 * heartbeat can access it.
+                 */
+
+                currentLatitude =
                     position.coords.latitude;
 
-                const longitude =
+                currentLongitude =
                     position.coords.longitude;
 
-                const gpsTimestamp =
-                    Date.now();
-
-                const accuracy =
+                currentAccuracy =
                     position.coords.accuracy ??
                     null;
 
+                lastGpsUpdate =
+                    Date.now();
+
 
                 // ===============================
-                // DRIVER STATUS
+                // DRIVER UI
                 // ===============================
 
                 setDriverStatus(
@@ -833,14 +886,14 @@ function startGPS() {
                 if (latitudeElement) {
 
                     latitudeElement.textContent =
-                        latitude.toFixed(6);
+                        currentLatitude.toFixed(6);
                 }
 
 
                 if (longitudeElement) {
 
                     longitudeElement.textContent =
-                        longitude.toFixed(6);
+                        currentLongitude.toFixed(6);
                 }
 
 
@@ -878,12 +931,13 @@ function startGPS() {
 
                 try {
 
-                    // IMPORTANT:
-                    //
-                    // Use UPDATE instead of SET.
-                    //
-                    // This updates only GPS fields
-                    // and preserves lastHeartbeat.
+                    /*
+                     * GPS updates use UPDATE,
+                     * not SET.
+                     *
+                     * This preserves
+                     * lastHeartbeat.
+                     */
 
                     await update(
                         busRef,
@@ -898,17 +952,28 @@ function startGPS() {
                             tripStarted:
                                 true,
 
-                            latitude,
+                            latitude:
+                                currentLatitude,
 
-                            longitude,
+                            longitude:
+                                currentLongitude,
 
                             timestamp:
-                                gpsTimestamp,
+                                Date.now(),
 
                             lastGpsUpdate:
-                                gpsTimestamp,
+                                lastGpsUpdate,
 
-                            accuracy
+                            accuracy:
+                                currentAccuracy,
+
+                            /*
+                             * The first GPS fix also
+                             * creates the first heartbeat.
+                             */
+
+                            lastHeartbeat:
+                                Date.now()
 
                         }
                     );
@@ -916,9 +981,25 @@ function startGPS() {
 
                     console.log(
                         "📍 GPS update:",
-                        latitude,
-                        longitude
+                        currentLatitude,
+                        currentLongitude
                     );
+
+
+                    /*
+                     * NOW start heartbeat.
+                     *
+                     * This guarantees ONLINE does
+                     * not appear before GPS.
+                     */
+
+                    if (
+                        heartbeatInterval === null
+                    ) {
+
+                        startHeartbeat();
+
+                    }
 
                 } catch (error) {
 
@@ -961,12 +1042,10 @@ function startGPS() {
 
                 } else if (error.code === 3) {
 
-                    // IMPORTANT:
-                    //
-                    // GPS timeout does NOT mean
-                    // the driver is offline.
-                    //
-                    // Heartbeat continues separately.
+                    /*
+                     * Timeout does NOT automatically
+                     * mean the driver is offline.
+                     */
 
                     setDriverStatus(
                         "WAITING FOR GPS"
@@ -1008,15 +1087,29 @@ async function () {
     }
 
 
+    if (tripStarted) {
+        return;
+    }
+
+
     try {
 
-        // ===============================
-        // MARK TRIP ACTIVE
-        // ===============================
+        /*
+         * Mark trip active locally.
+         */
 
         tripStarted =
             true;
 
+
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT write ONLINE here.
+         *
+         * The driver is only CONNECTING
+         * until GPS gives us a location.
+         */
 
         await set(
             busRef,
@@ -1026,7 +1119,7 @@ async function () {
                     BUS_ID,
 
                 status:
-                    "ONLINE",
+                    "OFFLINE",
 
                 tripStarted:
                     true,
@@ -1044,9 +1137,14 @@ async function () {
                     null,
 
                 lastHeartbeat:
-                    Date.now()
+                    null
 
             }
+        );
+
+
+        setDriverStatus(
+            "LOCATING..."
         );
 
 
@@ -1058,39 +1156,34 @@ async function () {
 
 
         // ===============================
-        // START HEARTBEAT
-        // ===============================
-
-        startHeartbeat();
-
-
-        console.log(
-            `${BUS_ID} trip started.`
-        );
-
-
-        // ===============================
         // START GPS
         // ===============================
 
         startGPS();
 
+
+        console.log(
+            `${BUS_ID} trip started. Waiting for GPS...`
+        );
+
+
     } catch (error) {
 
-        tripStarted =
-            false;
-
-        stopHeartbeat();
-
-
         console.error(
-            "Could not start trip:",
+            "Start trip error:",
             error
         );
 
 
-        alert(
-            "Could not start trip. Please try again."
+        tripStarted =
+            false;
+
+
+        stopHeartbeat();
+
+
+        setDriverStatus(
+            "OFFLINE"
         );
     }
 };
@@ -1106,7 +1199,6 @@ function restoreTripState() {
         return;
     }
 
-
     onValue(
         busRef,
         (snapshot) => {
@@ -1115,10 +1207,13 @@ function restoreTripState() {
                 snapshot.val();
 
 
+            // ===============================
+            // NO BUS DATA
+            // ===============================
+
             if (!bus) {
 
-                tripStarted =
-                    false;
+                tripStarted = false;
 
                 stopHeartbeat();
 
@@ -1130,17 +1225,26 @@ function restoreTripState() {
             }
 
 
-            if (
-                bus.tripStarted === true &&
-                bus.status === "ONLINE"
-            ) {
+            // ===============================
+            // ACTIVE TRIP
+            // ===============================
+            //
+            // IMPORTANT:
+            //
+            // tripStarted is what tells us
+            // that the driver is currently
+            // on a trip.
+            //
+            // status can temporarily be
+            // OFFLINE while GPS is locating.
+            //
+            // DO NOT cancel the trip just
+            // because status is OFFLINE.
+            // ===============================
 
-                // ===============================
-                // RESTORE ACTIVE TRIP
-                // ===============================
+            if (bus.tripStarted === true) {
 
-                tripStarted =
-                    true;
+                tripStarted = true;
 
 
                 const startButton =
@@ -1171,7 +1275,7 @@ function restoreTripState() {
 
 
                 // ===============================
-                // RESTORE COORDINATES
+                // RESTORE GPS
                 // ===============================
 
                 if (
@@ -1180,6 +1284,25 @@ function restoreTripState() {
                     bus.longitude !== null &&
                     bus.longitude !== undefined
                 ) {
+
+                    currentLatitude =
+                        Number(
+                            bus.latitude
+                        );
+
+                    currentLongitude =
+                        Number(
+                            bus.longitude
+                        );
+
+                    currentAccuracy =
+                        bus.accuracy ??
+                        null;
+
+                    lastGpsUpdate =
+                        bus.lastGpsUpdate ??
+                        null;
+
 
                     const latitude =
                         document.getElementById(
@@ -1195,59 +1318,95 @@ function restoreTripState() {
                     if (latitude) {
 
                         latitude.textContent =
-                            Number(
-                                bus.latitude
-                            ).toFixed(6);
+                            currentLatitude.toFixed(6);
                     }
 
 
                     if (longitude) {
 
                         longitude.textContent =
-                            Number(
-                                bus.longitude
-                            ).toFixed(6);
+                            currentLongitude.toFixed(6);
                     }
+
+
+                    // ===============================
+                    // BUS HAS GPS
+                    // ===============================
+
+                    if (
+                        bus.status === "ONLINE" &&
+                        bus.lastHeartbeat
+                    ) {
+
+                        setDriverStatus(
+                            "ONLINE"
+                        );
+
+
+                        /*
+                         * Start heartbeat only once.
+                         */
+
+                        if (
+                            heartbeatInterval === null
+                        ) {
+
+                            startHeartbeat();
+
+                        }
+
+                    } else {
+
+                        /*
+                         * Trip is active but we're
+                         * waiting for the live state.
+                         */
+
+                        setDriverStatus(
+                            "LOCATING..."
+                        );
+                    }
+
+
+                } else {
+
+                    // ===============================
+                    // NO GPS YET
+                    // ===============================
+
+                    setDriverStatus(
+                        "LOCATING..."
+                    );
                 }
 
 
-                setDriverStatus(
-                    "ONLINE"
-                );
-
-
                 // ===============================
-                // RE-REGISTER DISCONNECT
+                // DISCONNECT HANDLER
                 // ===============================
 
                 registerDisconnectHandler();
 
 
                 // ===============================
-                // RESTART HEARTBEAT
+                // GPS
                 // ===============================
 
-                startHeartbeat();
-
-
-                // ===============================
-                // RESTART GPS ONLY ONCE
-                // ===============================
-
-                if (watchID === null) {
+                if (
+                    watchID === null
+                ) {
 
                     startGPS();
+
                 }
 
 
             } else {
 
                 // ===============================
-                // NO ACTIVE TRIP
+                // TRIP NOT ACTIVE
                 // ===============================
 
-                tripStarted =
-                    false;
+                tripStarted = false;
 
                 stopHeartbeat();
 
@@ -1255,6 +1414,7 @@ function restoreTripState() {
                     "OFFLINE"
                 );
             }
+
         }
     );
 }
@@ -1283,13 +1443,38 @@ document.addEventListener(
                 tripStarted
             ) {
 
-                // Restart GPS watcher.
-                startGPS();
+                /*
+                 * Restart GPS only if needed.
+                 */
 
-                // Make sure heartbeat is alive.
-                startHeartbeat();
+                if (
+                    watchID === null
+                ) {
+
+                    startGPS();
+
+                }
+
+
+                /*
+                 * Restart heartbeat only if
+                 * GPS is already available.
+                 */
+
+                if (
+                    heartbeatInterval === null &&
+                    currentLatitude !== null &&
+                    currentLongitude !== null
+                ) {
+
+                    startHeartbeat();
+
+                }
+
             }
+
         }
+
     }
 );
 
@@ -1307,7 +1492,7 @@ async function () {
 
 
     // ===============================
-    // STOP TRIP STATE
+    // STOP TRIP
     // ===============================
 
     tripStarted =
@@ -1322,7 +1507,7 @@ async function () {
 
 
     // ===============================
-    // STOP GPS WATCHER
+    // STOP GPS
     // ===============================
 
     if (watchID !== null) {
@@ -1336,10 +1521,23 @@ async function () {
 
 
     // ===============================
-    // CANCEL DISCONNECT HANDLER
+    // CANCEL DISCONNECT
     // ===============================
 
     await cancelDisconnectHandler();
+
+
+    // ===============================
+    // RESET GPS STATE
+    // ===============================
+
+    currentLatitude = null;
+
+    currentLongitude = null;
+
+    currentAccuracy = null;
+
+    lastGpsUpdate = null;
 
 
     // ===============================
@@ -1444,6 +1642,7 @@ async function () {
         console.log(
             `${BUS_ID} trip ended.`
         );
+
 
     } catch (error) {
 
