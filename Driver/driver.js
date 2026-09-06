@@ -1,6 +1,7 @@
 
 
 
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
 import {
@@ -34,7 +35,9 @@ const database = getDatabase(app);
 // ===============================
 
 const params =
-    new URLSearchParams(window.location.search);
+    new URLSearchParams(
+        window.location.search
+    );
 
 const BUS_ID =
     params.get("bus");
@@ -45,16 +48,24 @@ const BUS_ID =
 // ===============================
 
 const driverSelection =
-    document.getElementById("driverSelection");
+    document.getElementById(
+        "driverSelection"
+    );
 
 const loginSection =
-    document.getElementById("loginSection");
+    document.getElementById(
+        "loginSection"
+    );
 
 const dashboardSection =
-    document.getElementById("dashboardSection");
+    document.getElementById(
+        "dashboardSection"
+    );
 
 const assignedBus =
-    document.getElementById("assignedBus");
+    document.getElementById(
+        "assignedBus"
+    );
 
 
 // ===============================
@@ -82,21 +93,16 @@ const DRIVER_PASSWORD =
 // GPS SETTINGS
 // ===============================
 
+// How old a GPS reading can be
+// before we consider it stale.
+
 const GPS_MAX_AGE =
     5000;
 
+// Browser GPS timeout
+
 const GPS_TIMEOUT =
     30000;
-
-
-// ===============================
-// TRIP STATE
-// ===============================
-
-// True only while the driver has an active trip.
-
-let tripActive =
-    false;
 
 
 // ===============================
@@ -158,7 +164,9 @@ const busRef =
 function checkPasswordRequirements() {
 
     const passwordInput =
-        document.getElementById("password");
+        document.getElementById(
+            "password"
+        );
 
     if (!passwordInput) return;
 
@@ -281,18 +289,24 @@ window.togglePassword =
 function () {
 
     const password =
-        document.getElementById("password");
+        document.getElementById(
+            "password"
+        );
 
     const toggle =
-        document.querySelector(".toggle-password");
+        document.querySelector(
+            ".toggle-password"
+        );
 
     if (
         !password ||
         !toggle
     ) return;
 
+
     if (
-        password.type === "password"
+        password.type ===
+        "password"
     ) {
 
         password.type =
@@ -358,18 +372,24 @@ window.login =
 function () {
 
     const passwordInput =
-        document.getElementById("password");
+        document.getElementById(
+            "password"
+        );
 
     const message =
-        document.getElementById("loginMessage");
+        document.getElementById(
+            "loginMessage"
+        );
 
     if (
         !passwordInput ||
         !message
     ) return;
 
+
     const password =
         passwordInput.value;
+
 
     if (!DRIVER_PASSWORD) {
 
@@ -382,6 +402,7 @@ function () {
         return;
     }
 
+
     if (
         password ===
         DRIVER_PASSWORD
@@ -392,6 +413,7 @@ function () {
 
         message.textContent =
             "✓ Login successful";
+
 
         setTimeout(
             () => {
@@ -410,6 +432,7 @@ function () {
             500
         );
 
+
     } else {
 
         message.className =
@@ -417,12 +440,13 @@ function () {
 
         message.textContent =
             "⚠ Incorrect password. Please try again.";
+
     }
 };
 
 
 // ===============================
-// GPS WATCHER
+// GPS
 // ===============================
 
 let watchID =
@@ -546,8 +570,6 @@ function startGPS() {
     }
 
 
-    // Clear the previous watcher.
-
     if (
         watchID !== null
     ) {
@@ -562,13 +584,19 @@ function startGPS() {
 
 
     const status =
-        document.getElementById("status");
+        document.getElementById(
+            "status"
+        );
 
     const latitudeElement =
-        document.getElementById("latitude");
+        document.getElementById(
+            "latitude"
+        );
 
     const longitudeElement =
-        document.getElementById("longitude");
+        document.getElementById(
+            "longitude"
+        );
 
 
     if (status) {
@@ -590,30 +618,17 @@ function startGPS() {
     }
 
 
-    console.log(
-        "📡 Starting GPS watcher..."
-    );
-
-
     watchID =
         navigator.geolocation.watchPosition(
 
             async (position) => {
-
-                // Ignore GPS updates if
-                // the driver has already
-                // stopped the trip.
-
-                if (!tripActive) {
-                    return;
-                }
-
 
                 const latitude =
                     position.coords.latitude;
 
                 const longitude =
                     position.coords.longitude;
+
 
                 const gpsTimestamp =
                     Date.now();
@@ -625,21 +640,19 @@ function startGPS() {
                         "ONLINE";
                 }
 
+
                 if (latitudeElement) {
 
                     latitudeElement.textContent =
                         latitude.toFixed(6);
                 }
 
+
                 if (longitudeElement) {
 
                     longitudeElement.textContent =
                         longitude.toFixed(6);
                 }
-
-                if (status) {
-    status.textContent = "ONLINE";
-}
 
 
                 const startButton =
@@ -659,6 +672,7 @@ function startGPS() {
                         "hidden"
                     );
                 }
+
 
                 if (stopButton) {
 
@@ -758,8 +772,8 @@ function startGPS() {
                     error.code === 2
                 ) {
 
-                    console.log(
-                        "Location unavailable. Retrying..."
+                    alert(
+                        "Your location could not be determined."
                     );
 
                 } else if (
@@ -767,34 +781,10 @@ function startGPS() {
                 ) {
 
                     console.log(
-                        "GPS timed out. Retrying..."
+                        "GPS request timed out. Waiting for another update..."
                     );
                 }
 
-
-                // If the trip is still active,
-                // retry GPS automatically.
-
-                if (tripActive) {
-
-                    setTimeout(
-                        () => {
-
-                            if (
-                                tripActive
-                            ) {
-
-                                console.log(
-                                    "🔄 Restarting GPS..."
-                                );
-
-                                startGPS();
-                            }
-
-                        },
-                        3000
-                    );
-                }
             },
 
 
@@ -824,10 +814,6 @@ async function () {
 
 
     try {
-
-        tripActive =
-            true;
-
 
         await set(
             busRef,
@@ -871,9 +857,6 @@ async function () {
 
     } catch (error) {
 
-        tripActive =
-            false;
-
         console.error(
             "Could not start trip:",
             error
@@ -894,66 +877,39 @@ function restoreTripState() {
 
     if (!busRef) return;
 
-
     onValue(
-
         busRef,
-
         (snapshot) => {
 
-            const bus =
-                snapshot.val();
-
+            const bus = snapshot.val();
 
             if (!bus) return;
-
 
             if (
                 bus.tripStarted === true &&
                 bus.status === "ONLINE"
             ) {
 
-                tripActive =
-                    true;
-
-
                 const status =
-                    document.getElementById(
-                        "status"
-                    );
+                    document.getElementById("status");
 
                 const startButton =
-                    document.getElementById(
-                        "startButton"
-                    );
+                    document.getElementById("startButton");
 
                 const stopButton =
-                    document.getElementById(
-                        "stopButton"
-                    );
-
+                    document.getElementById("stopButton");
 
                 if (status) {
-
-                    status.textContent =
-                        "ONLINE";
+                    status.textContent = "ONLINE";
                 }
 
-
                 if (startButton) {
-
-                    startButton.classList.add(
-                        "hidden"
-                    );
+                    startButton.classList.add("hidden");
                 }
 
                 if (stopButton) {
-
-                    stopButton.classList.remove(
-                        "hidden"
-                    );
+                    stopButton.classList.remove("hidden");
                 }
-
 
                 if (
                     bus.latitude !== null &&
@@ -961,46 +917,41 @@ function restoreTripState() {
                 ) {
 
                     const latitude =
-                        document.getElementById(
-                            "latitude"
-                        );
+                        document.getElementById("latitude");
 
                     const longitude =
-                        document.getElementById(
-                            "longitude"
-                        );
-
+                        document.getElementById("longitude");
 
                     if (latitude) {
-
                         latitude.textContent =
-                            Number(
-                                bus.latitude
-                            ).toFixed(6);
+                            Number(bus.latitude).toFixed(6);
                     }
 
                     if (longitude) {
-
                         longitude.textContent =
-                            Number(
-                                bus.longitude
-                            ).toFixed(6);
+                            Number(bus.longitude).toFixed(6);
                     }
                 }
 
-
                 registerDisconnectHandler();
 
-                startGPS();
+                // Only start GPS if there isn't already
+                // an active GPS watcher.
+                if (watchID === null) {
+                    startGPS();
+                }
             }
         }
     );
 }
 
-
 // ===============================
 // PAGE VISIBILITY
 // ===============================
+
+// When the driver returns to the page,
+// restart the GPS watcher so the browser
+// gets a fresh location request.
 
 document.addEventListener(
     "visibilitychange",
@@ -1016,39 +967,13 @@ document.addEventListener(
             );
 
 
-            // If there is an active trip,
-            // always restart the GPS watcher.
-
             if (
                 busRef &&
-                tripActive
+                watchID !== null
             ) {
 
                 startGPS();
             }
-        }
-    }
-);
-
-
-// ===============================
-// PAGE FOCUS
-// ===============================
-
-window.addEventListener(
-    "focus",
-    () => {
-
-        if (
-            busRef &&
-            tripActive
-        ) {
-
-            console.log(
-                "🔄 Driver page focused — refreshing GPS..."
-            );
-
-            startGPS();
         }
     }
 );
@@ -1062,14 +987,6 @@ window.stopTrip =
 async function () {
 
     if (!busRef) return;
-
-
-    // Stop the trip first so
-    // incoming GPS callbacks
-    // are ignored.
-
-    tripActive =
-        false;
 
 
     if (
@@ -1107,11 +1024,13 @@ async function () {
             "OFFLINE";
     }
 
+
     if (latitude) {
 
         latitude.textContent =
             "--";
     }
+
 
     if (longitude) {
 
@@ -1137,6 +1056,7 @@ async function () {
             "hidden"
         );
     }
+
 
     if (stopButton) {
 

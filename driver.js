@@ -877,19 +877,13 @@ function restoreTripState() {
 
     if (!busRef) return;
 
-
     onValue(
-
         busRef,
-
         (snapshot) => {
 
-            const bus =
-                snapshot.val();
-
+            const bus = snapshot.val();
 
             if (!bus) return;
-
 
             if (
                 bus.tripStarted === true &&
@@ -897,43 +891,25 @@ function restoreTripState() {
             ) {
 
                 const status =
-                    document.getElementById(
-                        "status"
-                    );
+                    document.getElementById("status");
 
                 const startButton =
-                    document.getElementById(
-                        "startButton"
-                    );
+                    document.getElementById("startButton");
 
                 const stopButton =
-                    document.getElementById(
-                        "stopButton"
-                    );
-
+                    document.getElementById("stopButton");
 
                 if (status) {
-
-                    status.textContent =
-                        "ONLINE";
+                    status.textContent = "ONLINE";
                 }
-
 
                 if (startButton) {
-
-                    startButton.classList.add(
-                        "hidden"
-                    );
+                    startButton.classList.add("hidden");
                 }
-
 
                 if (stopButton) {
-
-                    stopButton.classList.remove(
-                        "hidden"
-                    );
+                    stopButton.classList.remove("hidden");
                 }
-
 
                 if (
                     bus.latitude !== null &&
@@ -941,43 +917,33 @@ function restoreTripState() {
                 ) {
 
                     const latitude =
-                        document.getElementById(
-                            "latitude"
-                        );
+                        document.getElementById("latitude");
 
                     const longitude =
-                        document.getElementById(
-                            "longitude"
-                        );
-
+                        document.getElementById("longitude");
 
                     if (latitude) {
-
                         latitude.textContent =
-                            Number(
-                                bus.latitude
-                            ).toFixed(6);
+                            Number(bus.latitude).toFixed(6);
                     }
 
-
                     if (longitude) {
-
                         longitude.textContent =
-                            Number(
-                                bus.longitude
-                            ).toFixed(6);
+                            Number(bus.longitude).toFixed(6);
                     }
                 }
 
-
                 registerDisconnectHandler();
 
-                startGPS();
+                // Only start GPS if there isn't already
+                // an active GPS watcher.
+                if (watchID === null) {
+                    startGPS();
+                }
             }
         }
     );
 }
-
 
 // ===============================
 // PAGE VISIBILITY
