@@ -1,9 +1,5 @@
 
 
-import { inject } from "@vercel/analytics";
-
-inject();
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
 import {
