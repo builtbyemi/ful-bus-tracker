@@ -637,6 +637,10 @@ function startGPS() {
                         longitude.toFixed(6);
                 }
 
+                if (status) {
+    status.textContent = "ONLINE";
+}
+
 
                 const startButton =
                     document.getElementById(
@@ -797,7 +801,7 @@ function startGPS() {
             {
 
                 enableHighAccuracy:
-                    true,
+                    false,
 
                 maximumAge:
                     GPS_MAX_AGE,

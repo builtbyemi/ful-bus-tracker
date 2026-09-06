@@ -637,6 +637,10 @@ function startGPS() {
                         longitude.toFixed(6);
                 }
 
+                if (status) {
+    status.textContent = "ONLINE";
+}
+
 
                 const startButton =
                     document.getElementById(
