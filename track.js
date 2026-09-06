@@ -442,15 +442,18 @@ const busInfo = {
 // =====================================================
 
 function getTimestamp(value) {
+    const time = Number(value);
 
-    const timestamp =
-        Number(value);
-
-    if (!Number.isFinite(timestamp)) {
+    if (!Number.isFinite(time) || time <= 0) {
         return null;
     }
 
-    return timestamp;
+    // Firebase/server timestamps may sometimes be in seconds
+    if (time < 100000000000) {
+        return time * 1000;
+    }
+
+    return time;
 }
 
 function formatLastSeen(timestamp) {
@@ -463,7 +466,11 @@ function formatLastSeen(timestamp) {
 
     const age = Date.now() - time;
 
-    if (age < 5000) {
+    if (age < 0) {
+        return "Just now";
+    }
+
+    if (age < 10000) {
         return "Just now";
     }
 
@@ -481,7 +488,6 @@ function formatLastSeen(timestamp) {
 
     return `${Math.floor(age / 86400000)}d ago`;
 }
-
 
 // =====================================================
 // HEARTBEAT CHECK
@@ -1173,6 +1179,13 @@ onValue(
         currentBusData =
             buses;
 
+        console.log("🕒 FUL-001 LAST SEEN:", buses["FUL-001"]?.lastSeen);
+console.log("💓 FUL-001 HEARTBEAT:", buses["FUL-001"]?.lastHeartbeat);
+console.log(
+    "🕐 FUL-001 FORMATTED:",
+    formatLastSeen(buses["FUL-001"]?.lastSeen)
+);
+
 
         // =============================================
         // UPDATE ALL BUSES
@@ -1367,10 +1380,20 @@ function updateSelectedBus() {
 selectedBus.textContent =
     selectedBusId;
 
+const timestamps = [
+    getTimestamp(bus?.lastSeen),
+    getTimestamp(bus?.lastHeartbeat),
+    getTimestamp(bus?.lastGpsUpdate),
+    getTimestamp(bus?.timestamp)
+].filter(Boolean);
+
+const lastSeenTimestamp =
+    timestamps.length > 0
+        ? Math.max(...timestamps)
+        : null;
+
 selectedLastSeen.textContent =
-    bus?.lastHeartbeat
-        ? formatLastSeen(bus.lastHeartbeat)
-        : "Never";
+    formatLastSeen(lastSeenTimestamp);
 
 selectedRoute.textContent =
     busInfo[selectedBusId]?.route ||
@@ -1445,3 +1468,4 @@ function() {
 console.log(
     "🚌 FUL Bus Tracker initialized successfully."
 );
+
