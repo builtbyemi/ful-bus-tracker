@@ -920,3 +920,73 @@ MOBILE
 .back-home:hover {
     background: rgba(255, 255, 255, 0.18);
 }
+
+/* =========================================
+   BUS STATUS INDICATOR
+========================================= */
+
+.bus-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.bus-status span {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+
+    flex-shrink: 0;
+}
+
+
+/* ONLINE — GREEN */
+
+.bus-status.online {
+    color: #20a866;
+}
+
+.bus-status.online span {
+    background: #20a866;
+
+    box-shadow:
+        0 0 0 3px rgba(32, 168, 102, 0.15),
+        0 0 8px rgba(32, 168, 102, 0.7);
+}
+
+
+/* PAUSED — ORANGE */
+
+.bus-status.paused {
+    color: #f59e0b;
+}
+
+.bus-status.paused span {
+    background: #f59e0b;
+
+    box-shadow:
+        0 0 0 3px rgba(245, 158, 11, 0.15),
+        0 0 8px rgba(245, 158, 11, 0.7);
+}
+
+
+/* OFFLINE — RED */
+
+.bus-status.offline {
+    color: #ef4444;
+}
+
+.bus-status.offline span {
+    background: #ef4444;
+
+    box-shadow:
+        0 0 0 3px rgba(239, 68, 68, 0.15),
+        0 0 8px rgba(239, 68, 68, 0.7);
+}

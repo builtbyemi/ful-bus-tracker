@@ -1,9 +1,7 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,176 +15,46 @@
 
     <main class="driver-page">
 
-        <!-- Back Home -->
-        <a href="../index.html" class="back-home">
-            ← Back Home
-        </a>
+        <!-- Login -->
+        <section id="loginSection" class="driver-card">
 
+            <h1>FUL BUS TRACKER</h1>
 
-        <!-- =====================================
-             BUS SELECTION
-        ====================================== -->
+            <p>Driver Portal</p>
 
-        <section id="driverSelection" class="driver-card">
-
-            <div class="logo-circle">
-                🚍
-            </div>
-
-            <h1>Select Your Bus</h1>
-
-            <p class="subtitle">
-                Select the bus assigned to you.
-            </p>
-
-
-            <a href="driver.html?bus=FUL-001" class="bus-choice">
-                🚌 FUL-001
-                <span>Main Campus Route</span>
-            </a>
-
-
-            <a href="driver.html?bus=FUL-002" class="bus-choice">
-                🚌 FUL-002
-                <span>Lokoja Route</span>
-            </a>
-
-
-            <a href="driver.html?bus=FUL-003" class="bus-choice">
-                🚌 FUL-003
-                <span>Main Campus Route</span>
-            </a>
-
-        </section>
-
-
-        <!-- =====================================
-             DRIVER LOGIN
-        ====================================== -->
-
-        <section id="loginSection" class="driver-card hidden">
-
-            <div class="logo-circle">
-                🚍
-            </div>
-
-            <h1>Driver Login</h1>
-
-            <p class="subtitle">
-                FUL Bus Tracker Driver Portal
-            </p>
-
-
-            <div class="password-field">
-
-                <div class="password-wrapper">
-
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Enter driver password"
-                        oninput="checkPasswordRequirements()"
-                    >
-
-                    <button
-    type="button"
-    class="toggle-password"
-    onclick="togglePassword()"
-    aria-label="Show password"
->
-    <svg
-        viewBox="0 0 24 24"
-        width="20"
-        height="20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-    >
-        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-    </svg>
-</button>
-
-                </div>
-
-
-                <div class="password-requirements">
-
-                    <p id="length">
-                        ✕ At least 8 characters
-                    </p>
-
-                    <p id="uppercase">
-                        ✕ One uppercase letter
-                    </p>
-
-                    <p id="lowercase">
-                        ✕ One lowercase letter
-                    </p>
-
-                    <p id="number">
-                        ✕ One number
-                    </p>
-
-                    <p id="special">
-                        ✕ One special character
-                    </p>
-
-                </div>
-
-            </div>
-
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter driver password"
+            >
 
             <button onclick="login()">
                 LOGIN
             </button>
 
-
-            <div id="loginMessage"></div>
+            <p id="loginMessage"></p>
 
         </section>
 
 
-        <!-- =====================================
-             DRIVER DASHBOARD
-        ====================================== -->
-
+        <!-- Dashboard -->
         <section id="dashboardSection" class="driver-card hidden">
 
-            <div class="logo-circle">
-                🚍
-            </div>
+            <h1>DRIVER DASHBOARD</h1>
 
-            <h1>Driver Dashboard</h1>
-
-            <p class="subtitle">
+            <p class="welcome">
                 Welcome, Driver
             </p>
 
-
             <div class="bus-info">
-
-                <span>Assigned Bus</span>
-
-                <strong id="assignedBus">
-                    --
-                </strong>
-
+                <span>Bus</span>
+                <strong>FUL-001</strong>
             </div>
 
-
-            <div class="status-box">
-
-                <span>Status</span>
-
-                <strong id="status">
-                    OFFLINE
-                </strong>
-
+            <div class="status">
+                Status:
+                <strong id="status">OFFLINE</strong>
             </div>
-
 
             <button
                 id="startButton"
@@ -194,7 +62,6 @@
             >
                 START TRIP
             </button>
-
 
             <button
                 id="stopButton"
@@ -204,17 +71,16 @@
                 STOP TRIP
             </button>
 
-
             <div class="location">
 
                 <p>
                     Latitude:
-                    <strong id="latitude">--</strong>
+                    <span id="latitude">--</span>
                 </p>
 
                 <p>
                     Longitude:
-                    <strong id="longitude">--</strong>
+                    <span id="longitude">--</span>
                 </p>
 
             </div>
@@ -224,10 +90,7 @@
     </main>
 
 
-    <!-- JavaScript -->
-    <script type="module" src="driver.js"></script>
-    <script type="module" src="analytics.js"></script>
+    <script src="driver.js"></script>
 
 </body>
-
 </html>

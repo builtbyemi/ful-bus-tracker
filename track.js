@@ -60,7 +60,6 @@ const map = L.map("map", {
     ],
 
     maxBoundsViscosity: 1.0,
-
     zoomControl: true
 }).setView(
     [7.828, 6.706],
@@ -75,9 +74,7 @@ const map = L.map("map", {
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
-        attribution:
-            "&copy; OpenStreetMap contributors",
-
+        attribution: "&copy; OpenStreetMap contributors",
         maxZoom: 19
     }
 ).addTo(map);
@@ -93,13 +90,19 @@ L.control.scale({
 
 
 // =====================================================
+// LOWER ZOOM CONTROL
+// =====================================================
+
+map.zoomControl.setPosition("topleft");
+
+
+// =====================================================
 // LOCATION ICON
 // =====================================================
 
 const locationIcon = L.divIcon({
 
-    className:
-        "location-marker",
+    className: "location-marker",
 
     html: `
         <div style="
@@ -119,15 +122,8 @@ const locationIcon = L.divIcon({
         </div>
     `,
 
-    iconSize: [
-        34,
-        34
-    ],
-
-    iconAnchor: [
-        17,
-        17
-    ]
+    iconSize: [34, 34],
+    iconAnchor: [17, 17]
 });
 
 
@@ -137,8 +133,7 @@ const locationIcon = L.divIcon({
 
 const routePointIcon = L.divIcon({
 
-    className:
-        "route-point-marker",
+    className: "route-point-marker",
 
     html: `
         <div style="
@@ -151,15 +146,8 @@ const routePointIcon = L.divIcon({
         "></div>
     `,
 
-    iconSize: [
-        18,
-        18
-    ],
-
-    iconAnchor: [
-        9,
-        9
-    ]
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
 });
 
 
@@ -252,7 +240,7 @@ L.marker(
 
 
 // =====================================================
-// ROUTE
+// ROAD ROUTE
 // =====================================================
 
 let routeCoordinates = [];
@@ -262,58 +250,41 @@ async function loadRoute() {
     try {
 
         const url =
-            `https://router.project-osrm.org/route/v1/driving/` +
+            "https://router.project-osrm.org/route/v1/driving/" +
             `${adankolo[1]},${adankolo[0]};` +
             `${routePoint[1]},${routePoint[0]};` +
             `${felele[1]},${felele[0]}` +
-            `?overview=full&geometries=geojson`;
-
+            "?overview=full&geometries=geojson";
 
         const response =
             await fetch(url);
 
-
         if (!response.ok) {
-
-            throw new Error(
-                "OSRM request failed"
-            );
+            throw new Error("OSRM request failed");
         }
-
 
         const data =
             await response.json();
-
 
         if (
             !data.routes ||
             !data.routes.length
         ) {
-
-            throw new Error(
-                "No route returned"
-            );
+            throw new Error("No route returned");
         }
-
 
         const coordinates =
             data.routes[0]
                 .geometry
                 .coordinates;
 
-
         routeCoordinates =
             coordinates.map(
-                ([lng, lat]) => [
-                    lat,
-                    lng
-                ]
+                ([lng, lat]) => [lat, lng]
             );
 
 
-        // =================================================
         // ROUTE OUTLINE
-        // =================================================
 
         L.polyline(
             routeCoordinates,
@@ -325,9 +296,7 @@ async function loadRoute() {
         ).addTo(map);
 
 
-        // =================================================
         // MAIN ROUTE
-        // =================================================
 
         L.polyline(
             routeCoordinates,
@@ -344,7 +313,6 @@ async function loadRoute() {
             routeCoordinates.length,
             "points"
         );
-
 
     } catch (error) {
 
@@ -367,18 +335,12 @@ function getBusSize() {
     const zoom =
         map.getZoom();
 
-
     const size =
-        42 -
-        ((zoom - 13) * 3);
-
+        42 - ((zoom - 13) * 3);
 
     return Math.max(
         25,
-        Math.min(
-            42,
-            size
-        )
+        Math.min(42, size)
     );
 }
 
@@ -394,8 +356,7 @@ function createBusIcon(
 
     return L.divIcon({
 
-        className:
-            "bus-marker",
+        className: "bus-marker",
 
         html: `
             <img
@@ -434,19 +395,15 @@ function createBusIcon(
 
 const busMarkers = {};
 
+const busBearings = {};
+
 let currentBusData = {};
 
-let selectedBusId =
-    "FUL-001";
-
-
-// Stores the latest direction of each bus
-
-const busBearings = {};
+let selectedBusId = "FUL-001";
 
 
 // =====================================================
-// BUS ROUTES / NAMES
+// BUS INFORMATION
 // =====================================================
 
 const busInfo = {
@@ -470,22 +427,78 @@ const busInfo = {
 
 
 // =====================================================
-// BUS STATUS
+// CHECK GPS STALE
 // =====================================================
 
-function isBusOnline(bus) {
+function isBusStale(bus) {
 
-    return (
-        bus &&
-        bus.status === "ONLINE" &&
-        bus.latitude !== null &&
-        bus.longitude !== null
-    );
+    if (!bus) {
+        return true;
+    }
+
+    const gpsTime =
+        bus.lastGpsUpdate ??
+        bus.timestamp;
+
+    if (!gpsTime) {
+        return true;
+    }
+
+    const age =
+        Date.now() - Number(gpsTime);
+
+    return age > 15000;
 }
 
 
 // =====================================================
-// UPDATE BUS CARD STATUS
+// GET BUS STATE
+// =====================================================
+
+function getBusState(bus) {
+
+    // No Firebase data
+    if (!bus) {
+        return "OFFLINE";
+    }
+
+    // Driver is not currently on a trip
+    if (
+        bus.status !== "ONLINE" ||
+        bus.tripStarted !== true
+    ) {
+        return "OFFLINE";
+    }
+
+    // Trip started but GPS hasn't provided coordinates yet
+    if (
+        bus.latitude === null ||
+        bus.longitude === null
+    ) {
+        return "OFFLINE";
+    }
+
+    // Driver is active but GPS stopped updating
+    if (isBusStale(bus)) {
+        return "PAUSED";
+    }
+
+    return "ONLINE";
+}
+
+
+// =====================================================
+// CHECK FRESH ONLINE BUS
+// =====================================================
+
+function isBusOnline(bus) {
+
+    return getBusState(bus) === "ONLINE";
+}
+
+
+// =====================================================
+// UPDATE BUS CARD
 // =====================================================
 
 function updateBusCard(
@@ -498,23 +511,41 @@ function updateBusCard(
             `busStatus-${busId}`
         );
 
-
     if (!statusElement) {
         return;
     }
 
+    const state =
+        getBusState(bus);
 
-    if (
-        isBusOnline(bus)
-    ) {
+
+    // ONLINE
+
+    if (state === "ONLINE") {
 
         statusElement.className =
             "bus-status online";
 
         statusElement.innerHTML =
             "<span></span>ONLINE";
+    }
 
-    } else {
+
+    // PAUSED
+
+    else if (state === "PAUSED") {
+
+        statusElement.className =
+            "bus-status paused";
+
+        statusElement.innerHTML =
+            "<span></span>PAUSED";
+    }
+
+
+    // OFFLINE
+
+    else {
 
         statusElement.className =
             "bus-status offline";
@@ -529,30 +560,23 @@ function updateBusCard(
 // REMOVE BUS MARKER
 // =====================================================
 
-function removeBusMarker(
-    busId
-) {
+function removeBusMarker(busId) {
 
-    if (
-        busMarkers[busId]
-    ) {
-
-        map.removeLayer(
-            busMarkers[busId]
-        );
-
-        delete busMarkers[
-            busId
-        ];
-
-        delete busBearings[
-            busId
-        ];
-
-        console.log(
-            `🗑️ ${busId} removed from map`
-        );
+    if (!busMarkers[busId]) {
+        return;
     }
+
+    map.removeLayer(
+        busMarkers[busId]
+    );
+
+    delete busMarkers[busId];
+
+    delete busBearings[busId];
+
+    console.log(
+        `🗑️ ${busId} removed from map`
+    );
 }
 
 
@@ -570,49 +594,39 @@ async function getPlaceName(
     const now =
         Date.now();
 
-
     if (
         now - lastGeocodeTime < 15000
     ) {
-
         return null;
     }
-
 
     lastGeocodeTime =
         now;
 
-
     try {
 
         const url =
-            `https://nominatim.openstreetmap.org/reverse` +
+            "https://nominatim.openstreetmap.org/reverse" +
             `?format=json` +
             `&lat=${latitude}` +
             `&lon=${longitude}` +
             `&zoom=18` +
             `&addressdetails=1`;
 
-
         const response =
             await fetch(url);
 
-
         if (!response.ok) {
-
             throw new Error(
                 "Geocoding failed"
             );
         }
 
-
         const data =
             await response.json();
 
-
         const address =
             data.address || {};
-
 
         return (
             address.neighbourhood ||
@@ -625,7 +639,6 @@ async function getPlaceName(
             address.road ||
             "Unknown location"
         );
-
 
     } catch (error) {
 
@@ -640,7 +653,7 @@ async function getPlaceName(
 
 
 // =====================================================
-// UPDATE POPUP LOCATION
+// UPDATE LOCATION NAME
 // =====================================================
 
 async function updateLocationName(
@@ -655,17 +668,14 @@ async function updateLocationName(
             longitude
         );
 
-
     if (!place) {
         return;
     }
-
 
     const element =
         document.getElementById(
             `busLocationName-${busId}`
         );
-
 
     if (element) {
 
@@ -685,28 +695,20 @@ function getBearing(
 ) {
 
     const lat1 =
-        from[0] *
-        Math.PI / 180;
+        from[0] * Math.PI / 180;
 
     const lat2 =
-        to[0] *
-        Math.PI / 180;
+        to[0] * Math.PI / 180;
 
     const lon1 =
-        from[1] *
-        Math.PI / 180;
+        from[1] * Math.PI / 180;
 
     const lon2 =
-        to[1] *
-        Math.PI / 180;
-
+        to[1] * Math.PI / 180;
 
     const y =
-        Math.sin(
-            lon2 - lon1
-        ) *
+        Math.sin(lon2 - lon1) *
         Math.cos(lat2);
-
 
     const x =
         Math.cos(lat1) *
@@ -714,18 +716,11 @@ function getBearing(
         -
         Math.sin(lat1) *
         Math.cos(lat2) *
-        Math.cos(
-            lon2 - lon1
-        );
-
+        Math.cos(lon2 - lon1);
 
     const bearing =
-        Math.atan2(
-            y,
-            x
-        ) *
+        Math.atan2(y, x) *
         180 / Math.PI;
-
 
     return (
         bearing + 360
@@ -745,7 +740,6 @@ function createBusPopup(
         busInfo[busId]?.route ||
         "FUL Bus Route";
 
-
     return `
         <div style="min-width:200px;">
 
@@ -757,9 +751,12 @@ function createBusPopup(
 
             <span
                 id="busLiveStatus-${busId}"
-                style="color:#20a866;font-weight:700;"
-           >
-              ● LIVE
+                style="
+                    color:#20a866;
+                    font-weight:700;
+                "
+            >
+                ● ONLINE
             </span>
 
             <br><br>
@@ -777,50 +774,82 @@ function createBusPopup(
     `;
 }
 
-function isBusStale(bus) {
 
-    if (!bus) {
-        return true;
+// =====================================================
+// UPDATE BUS POPUP STATUS
+// =====================================================
+
+function updateBusPopupStatus(
+    busId,
+    bus
+) {
+
+    const element =
+        document.getElementById(
+            `busLiveStatus-${busId}`
+        );
+
+    if (!element) {
+        return;
     }
 
-    // Use lastGpsUpdate if available.
-    // Fall back to timestamp for compatibility.
-    const gpsTime =
-        bus.lastGpsUpdate ??
-        bus.timestamp;
+    const state =
+        getBusState(bus);
 
-    if (!gpsTime) {
-        return true;
+
+    if (state === "ONLINE") {
+
+        element.style.color =
+            "#20a866";
+
+        element.textContent =
+            "● ONLINE";
     }
 
-    const age =
-        Date.now() -
-        Number(gpsTime);
+    else if (state === "PAUSED") {
 
-    // Bus is considered stale after 15 seconds
-    return age > 15000;
+        element.style.color =
+            "#f59e0b";
+
+        element.textContent =
+            "● PAUSED";
+    }
+
+    else {
+
+        element.style.color =
+            "#ef4444";
+
+        element.textContent =
+            "● OFFLINE";
+    }
 }
 
 
 // =====================================================
-// UPDATE / CREATE BUS
+// UPDATE / CREATE BUS MARKER
 // =====================================================
+
 function updateBusMarker(
     busId,
     bus
 ) {
 
-    if (
-    !bus ||
-    bus.status !== "ONLINE" ||
-    bus.latitude === null ||
-    bus.longitude === null
-) {
-    removeBusMarker(busId);
-    return;
-}
+    // Completely inactive bus
+    // gets removed from map.
 
-const stale = isBusStale(bus);
+    if (
+        !bus ||
+        bus.status !== "ONLINE" ||
+        bus.tripStarted !== true ||
+        bus.latitude === null ||
+        bus.longitude === null
+    ) {
+
+        removeBusMarker(busId);
+
+        return;
+    }
 
 
     const position = [
@@ -832,7 +861,6 @@ const stale = isBusStale(bus);
         Number(
             bus.longitude
         )
-
     ];
 
 
@@ -840,9 +868,7 @@ const stale = isBusStale(bus);
     // CREATE MARKER
     // =================================================
 
-    if (
-        !busMarkers[busId]
-    ) {
+    if (!busMarkers[busId]) {
 
         const marker =
             L.marker(
@@ -853,10 +879,10 @@ const stale = isBusStale(bus);
                             getBusSize()
                         ),
 
-                    zIndexOffset:
-                        1000
+                    zIndexOffset: 1000
                 }
-            ).addTo(map);
+            )
+            .addTo(map);
 
 
         marker.bindPopup(
@@ -866,14 +892,11 @@ const stale = isBusStale(bus);
         );
 
 
-        busMarkers[
-            busId
-        ] = marker;
+        busMarkers[busId] =
+            marker;
 
-
-        busBearings[
-            busId
-        ] = 0;
+        busBearings[busId] =
+            0;
 
 
         console.log(
@@ -888,7 +911,6 @@ const stale = isBusStale(bus);
             position[1]
         );
 
-
         return;
     }
 
@@ -898,26 +920,21 @@ const stale = isBusStale(bus);
     // =================================================
 
     const marker =
-        busMarkers[
-            busId
-        ];
-
+        busMarkers[busId];
 
     const currentPosition =
         marker.getLatLng();
-
 
     const previous = [
 
         currentPosition.lat,
 
         currentPosition.lng
-
     ];
 
 
-    // Only calculate direction if
-    // the bus actually moved
+    // Calculate direction only
+    // when bus actually moves.
 
     if (
         previous[0] !== position[0] ||
@@ -930,10 +947,8 @@ const stale = isBusStale(bus);
                 position
             );
 
-
-        busBearings[
-            busId
-        ] = bearing;
+        busBearings[busId] =
+            bearing;
     }
 
 
@@ -950,16 +965,23 @@ const stale = isBusStale(bus);
     );
 
 
-    console.log(
-        `📍 ${busId} moved:`,
-        position
-    );
-
-
     updateLocationName(
         busId,
         position[0],
         position[1]
+    );
+
+
+    // Update popup status
+    updateBusPopupStatus(
+        busId,
+        bus
+    );
+
+
+    console.log(
+        `📍 ${busId} updated:`,
+        position
     );
 }
 
@@ -993,30 +1015,11 @@ onValue(
             buses;
 
 
-    // =====================================================
-// CHECK FOR STALE BUSES
-// =====================================================
-
-setInterval(() => {
-
-    Object.keys(currentBusData).forEach((busId) => {
-
-        const bus = currentBusData[busId];
-
-        updateBusCard(busId, bus);
-
-    });
-
-}, 5000);
-
-
         // =============================================
-        // UPDATE EVERY BUS
+        // UPDATE ALL BUSES
         // =============================================
 
-        Object.keys(
-            buses
-        ).forEach(
+        Object.keys(buses).forEach(
             (busId) => {
 
                 const bus =
@@ -1033,23 +1036,32 @@ setInterval(() => {
                     busId,
                     bus
                 );
+
+
+                updateBusPopupStatus(
+                    busId,
+                    bus
+                );
             }
         );
 
 
         // =============================================
-        // REMOVE MARKERS THAT NO LONGER EXIST
+        // REMOVE BUSES THAT ARE TRULY OFFLINE
         // =============================================
 
-        Object.keys(
-            busMarkers
-        ).forEach(
+        Object.keys(busMarkers).forEach(
             (busId) => {
 
+                const bus =
+                    buses[busId];
+
                 if (
-                    !isBusOnline(
-                        buses[busId]
-                    )
+                    !bus ||
+                    bus.status !== "ONLINE" ||
+                    bus.tripStarted !== true ||
+                    bus.latitude === null ||
+                    bus.longitude === null
                 ) {
 
                     removeBusMarker(
@@ -1070,6 +1082,42 @@ setInterval(() => {
 
 
 // =====================================================
+// REFRESH STATUS EVERY 5 SECONDS
+// =====================================================
+
+setInterval(
+    () => {
+
+        Object.keys(
+            currentBusData
+        ).forEach(
+            (busId) => {
+
+                const bus =
+                    currentBusData[busId];
+
+
+                updateBusCard(
+                    busId,
+                    bus
+                );
+
+
+                updateBusPopupStatus(
+                    busId,
+                    bus
+                );
+            }
+        );
+
+
+        updateSelectedBus();
+    },
+    5000
+);
+
+
+// =====================================================
 // BUS ICON RESIZE
 // =====================================================
 
@@ -1083,9 +1131,7 @@ map.on(
             (busId) => {
 
                 const marker =
-                    busMarkers[
-                        busId
-                    ];
+                    busMarkers[busId];
 
 
                 marker.setIcon(
@@ -1111,12 +1157,11 @@ function(busId) {
         busId;
 
     updateSelectedBus();
-
 };
 
 
 // =====================================================
-// UPDATE SELECTED BUS PANEL
+// UPDATE SELECTED BUS
 // =====================================================
 
 function updateSelectedBus() {
@@ -1126,12 +1171,10 @@ function updateSelectedBus() {
             "selectedBus"
         );
 
-
     const selectedStatus =
         document.getElementById(
             "selectedStatus"
         );
-
 
     const selectedRoute =
         document.getElementById(
@@ -1144,7 +1187,6 @@ function updateSelectedBus() {
         !selectedStatus ||
         !selectedRoute
     ) {
-
         return;
     }
 
@@ -1159,47 +1201,42 @@ function updateSelectedBus() {
         selectedBusId;
 
 
-    selectedStatus.textContent =
-        isBusOnline(bus)
-            ? "LIVE"
-            : "OFFLINE";
+    const state =
+        getBusState(bus);
+
+
+    if (state === "ONLINE") {
+
+        selectedStatus.textContent =
+            "ONLINE";
+
+        selectedStatus.style.color =
+            "#20a866";
+    }
+
+    else if (state === "PAUSED") {
+
+        selectedStatus.textContent =
+            "PAUSED";
+
+        selectedStatus.style.color =
+            "#f59e0b";
+    }
+
+    else {
+
+        selectedStatus.textContent =
+            "OFFLINE";
+
+        selectedStatus.style.color =
+            "#ef4444";
+    }
 
 
     selectedRoute.textContent =
-        busInfo[
-            selectedBusId
-        ]?.route ||
+        busInfo[selectedBusId]?.route ||
         "FUL Bus Route";
 }
-
-setInterval(() => {
-
-    Object.keys(
-        currentBusData
-    ).forEach(
-        (busId) => {
-
-            const bus =
-                currentBusData[busId];
-
-
-            updateBusCard(
-                busId,
-                bus
-            );
-
-
-            updateBusPopupStatus(
-                busId,
-                bus
-            );
-        }
-    );
-
-
-    updateSelectedBus();
-
-}, 10000);
 
 
 // =====================================================
@@ -1214,61 +1251,20 @@ function() {
             ".bus-panel"
         );
 
-
     if (!panel) {
         return;
     }
-
 
     panel.classList.toggle(
         "hidden"
     );
 };
 
-function updateBusPopupStatus(
-    busId,
-    bus
-) {
 
-    const element =
-        document.getElementById(
-            `busLiveStatus-${busId}`
-        );
+// =====================================================
+// FINISHED
+// =====================================================
 
-
-    if (!element) {
-        return;
-    }
-
-
-    if (
-        isBusOnline(bus)
-    ) {
-
-        element.style.color =
-            "#20a866";
-
-        element.textContent =
-            "● LIVE";
-
-
-    } else if (
-        isBusStale(bus)
-    ) {
-
-        element.style.color =
-            "#f59e0b";
-
-        element.textContent =
-            "● GPS STALE";
-
-
-    } else {
-
-        element.style.color =
-            "#ef4444";
-
-        element.textContent =
-            "● OFFLINE";
-    }
-}
+console.log(
+    "🚌 FUL Bus Tracker initialized successfully."
+);
