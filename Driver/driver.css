@@ -1,8 +1,9 @@
 
 
-/* =========================
-   RESET
-========================= */
+/* =========================================
+   FUL BUS TRACKER — DRIVER PORTAL
+   Modern Driver Dashboard
+========================================= */
 
 * {
     margin: 0;
@@ -10,775 +11,776 @@
     box-sizing: border-box;
 }
 
-
-/* =========================
-   PAGE
-========================= */
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
 
 body {
-    min-height: 100vh;
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
 
-    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at 15% 10%, rgba(8, 123, 128, 0.18), transparent 32%),
+        radial-gradient(circle at 85% 85%, rgba(32, 168, 102, 0.10), transparent 30%),
+        #06121f;
 
-    background: #087b80;
-
-    color: white;
+    color: #ffffff;
 }
 
-
-/* =========================
-   DRIVER PAGE
-========================= */
+/* =========================================
+   PAGE
+========================================= */
 
 .driver-page {
+    position: relative;
+    width: 100%;
     min-height: 100vh;
-
-    width: 100%;
+    min-height: 100svh;
 
     display: flex;
-
-    flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
 
-    padding: 80px 20px 40px;
-
-    position: relative;
-}
-
-
-/* =========================
-   BACK HOME
-========================= */
-
-.back-home {
-    position: absolute;
-
-    top: 30px;
-    left: 30px;
-
-    color: white;
-
-    text-decoration: none;
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-    padding: 10px 18px;
-
-    border: 1px solid rgba(255, 255, 255, 0.3);
-
-    border-radius: 50px;
-
-    background: rgba(255, 255, 255, 0.1);
-
-    transition: 0.25s ease;
-}
-
-.back-home:hover {
-    background: white;
-
-    color: #087b80;
-
-    transform: translateY(-2px);
-}
-
-
-/* =========================
-   CARD
-========================= */
-
-.driver-card {
-    width: 100%;
-
-    max-width: 420px;
-
-    padding: 40px 35px;
-
-    text-align: center;
-
-    background: rgba(255, 255, 255, 0.12);
-
-    border: 1px solid rgba(255, 255, 255, 0.25);
-
-    border-radius: 24px;
-
-    backdrop-filter: blur(12px);
-
-    box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.15);
-}
-
-
-/* =========================
-   LOGO
-========================= */
-
-.logo-circle {
-    width: 60px;
-
-    height: 60px;
-
-    margin: 0 auto 20px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: white;
-
-    font-size: 28px;
-}
-
-
-/* =========================
-   HEADINGS
-========================= */
-
-.driver-card h1 {
-    font-size: 28px;
-
-    margin-bottom: 8px;
-}
-
-.subtitle {
-    font-size: 14px;
-
-    opacity: 0.75;
-
-    margin-bottom: 28px;
-}
-
-
-/* =========================
-   INPUT
-========================= */
-
-input {
-    width: 100%;
-
-    height: 52px;
-
-    padding: 0 16px;
-
-    border: none;
-
-    outline: none;
-
-    border-radius: 12px;
-
-    font-size: 15px;
-
-    margin-bottom: 15px;
-}
-
-input:focus {
-    box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.4);
-}
-
-
-/* =========================
-   BUTTON
-========================= */
-
-button {
-    width: 100%;
-
-    height: 52px;
-
-    border: none;
-
-    border-radius: 12px;
-
-    background: #f4c542;
-
-    color: #111;
-
-    font-size: 14px;
-
-    font-weight: 800;
-
-    cursor: pointer;
-
-    transition: 0.25s ease;
-}
-
-button:hover {
-    transform: translateY(-2px);
-
-    opacity: 0.92;
-}
-
-
-/* =========================
-   LOGIN MESSAGE
-========================= */
-
-#loginMessage {
-    margin-top: 15px;
-
-    font-size: 13px;
-}
-
-
-/* =========================
-   BUS INFO
-========================= */
-
-.bus-info,
-.status-box,
-.location {
-    width: 100%;
-
-    padding: 16px;
-
-    margin-bottom: 12px;
-
-    border-radius: 12px;
-
-    background: rgba(0, 0, 0, 0.15);
-}
-
-.bus-info,
-.status-box {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-}
-
-.bus-info span,
-.status-box span {
-    opacity: 0.7;
-
-    font-size: 13px;
-}
-
-.bus-info strong {
-    font-size: 16px;
-}
-
-
-/* =========================
-   STATUS
-========================= */
-
-.status-box strong {
-    font-size: 13px;
-}
-
-
-/* =========================
-   LOCATION
-========================= */
-
-.location {
-    margin-top: 20px;
-
-    margin-bottom: 0;
-}
-
-.location p {
-    font-size: 13px;
-
-    margin: 8px 0;
-}
-
-.location strong {
-    word-break: break-all;
-}
-
-
-/* =========================
-   STOP BUTTON
-========================= */
-
-.stop {
-    margin-top: 10px;
-
-    background: white;
-
-    color: #087b80;
-}
-
-
-/* =========================
-   HIDDEN
-========================= */
-
-.hidden {
-    display: none;
-}
-
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 600px) {
-
-    .driver-page {
-        padding: 90px 16px 30px;
-
-        justify-content: center;
-    }
-
-
-    .back-home {
-        top: 20px;
-
-        left: 16px;
-
-        font-size: 12px;
-
-        padding: 9px 15px;
-    }
-
-
-    .driver-card {
-        max-width: 100%;
-
-        padding: 32px 22px;
-
-        border-radius: 20px;
-    }
-
-
-    .driver-card h1 {
-        font-size: 24px;
-    }
-
-
-    .subtitle {
-        font-size: 13px;
-    }
-
-
-    .logo-circle {
-        width: 55px;
-
-        height: 55px;
-
-        font-size: 25px;
-    }
-
-}
-
-.password-requirements {
-    text-align: left;
-    margin: -5px 0 18px;
-    padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.12);
-    border-radius: 10px;
-}
-
-.password-requirements p {
-    margin: 5px 0;
-    font-size: 11px;
-    color: #ffb3b3;
-}
-
-.password-requirements p.valid {
-    color: #7dffb2;
-}
-
-
-/* Login Messages */
-
-#loginMessage {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.error-message {
-    background: rgba(220, 40, 40, 0.25);
-    border: 1px solid #ff6b6b;
-    color: #ffdddd;
-}
-
-.success-message {
-    background: rgba(30, 180, 100, 0.25);
-    border: 1px solid #54e391;
-    color: #d8ffe7;
-}
-
-.password-wrapper {
-    position: relative;
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-.password-wrapper input {
-    width: 100%;
-    margin-bottom: 0;
-    padding-right: 50px;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-
-    width: 40px;
-    height: 40px;
-
-    padding: 0;
-    background: transparent;
-    color: #555;
-
-    border: none;
-    box-shadow: none;
-
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.toggle-password:hover {
-    transform: translateY(-50%);
-    background: transparent;
-    opacity: 0.7;
-}
-
-
-/* ================================
-   SELECT YOUR BUS
-================================ */
-
-#driverSelection {
-    background: linear-gradient(145deg, #07111f 0%, #0b1929 55%, #102b45 100%);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 22px;
-    padding: 35px 28px;
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    position: relative;
+    padding: 70px 20px 30px;
     overflow: hidden;
 }
 
-/* Soft background glow */
-#driverSelection::before {
+/* subtle background glow */
+
+.driver-page::before {
     content: "";
-    position: absolute;
-    width: 220px;
-    height: 220px;
-    background: rgba(0, 153, 255, 0.12);
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    top: -180px;
+    left: -150px;
+
+    background: rgba(8, 123, 128, 0.12);
+    filter: blur(80px);
     border-radius: 50%;
-    filter: blur(70px);
-    top: -100px;
-    right: -70px;
+
+    pointer-events: none;
 }
 
-#driverSelection::after {
+.driver-page::after {
     content: "";
-    position: absolute;
-    width: 180px;
-    height: 180px;
-    background: rgba(0, 110, 255, 0.08);
-    border-radius: 50%;
-    filter: blur(60px);
-    bottom: -90px;
-    left: -70px;
-}
+    position: fixed;
+    width: 350px;
+    height: 350px;
+    right: -140px;
+    bottom: -150px;
 
-/* Logo */
-#driverSelection .logo-circle {
-    width: 70px;
-    height: 70px;
-    margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(32, 168, 102, 0.08);
+    filter: blur(80px);
     border-radius: 50%;
 
-    font-size: 32px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    position: relative;
-    z-index: 1;
-}
-
-/* Heading */
-#driverSelection h1 {
-    color: #ffffff;
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Subtitle */
-#driverSelection .subtitle {
-    color: rgba(255, 255, 255, 0.6);
-    text-align: center;
-    margin-bottom: 25px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Bus buttons */
-.bus-choice {
-    position: relative;
-    z-index: 1;
-
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    width: 100%;
-    box-sizing: border-box;
-
-    padding: 17px 18px;
-    margin-top: 12px;
-
-    text-decoration: none;
-    color: #ffffff;
-
-    background: rgba(255, 255, 255, 0.055);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 14px;
-
-    font-size: 16px;
-    font-weight: 600;
-
-    backdrop-filter: blur(10px);
-
-    transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-/* Route text */
-.bus-choice span {
-    display: block;
-    font-size: 12px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Hover */
-.bus-choice:hover {
-    transform: translateY(-3px);
-
-    background: rgba(0, 153, 255, 0.10);
-    border-color: rgba(0, 170, 255, 0.45);
-
-    box-shadow:
-        0 12px 30px rgba(0, 110, 255, 0.15);
-}
-
-/* Click effect */
-.bus-choice:active {
-    transform: scale(0.98);
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-    #driverSelection {
-        padding: 30px 20px;
-        border-radius: 18px;
-    }
-
-    #driverSelection h1 {
-        font-size: 24px;
-    }
-
-    .bus-choice {
-        padding: 15px;
-    }
-}
-
-.toggle-password {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #777;
-}
-
-.toggle-password:hover {
-    color: #008cff;
-}
-
-.toggle-password svg {
     pointer-events: none;
 }
 
 /* =========================================
-DRIVER STATUS INDICATOR
-========================================= */
-
-.status-box {
-position: relative;
-}
-
-.status-box strong {
-display: inline-flex;
-align-items: center;
-gap: 8px;
-}
-
-/* Status dot */
-.status-box strong::before {
-content: "";
-width: 9px;
-height: 9px;
-border-radius: 50%;
-display: inline-block;
-background: #ef4444;
-}
-
-/* ONLINE — green pulsing dot */
-.status-box strong.online::before {
-background: #20a866;
-box-shadow: 0 0 0 0 rgba(32, 168, 102, 0.7);
-animation: onlinePulse 1.8s infinite;
-}
-
-/* OFFLINE — red dot */
-.status-box strong.offline::before {
-background: #ef4444;
-box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35);
-}
-
-/* GPS waiting/error — amber */
-.status-box strong.warning::before {
-background: #f59e0b;
-box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.45);
-animation: warningPulse 1.8s infinite;
-}
-
-@keyframes onlinePulse {
-0% {
-box-shadow: 0 0 0 0 rgba(32, 168, 102, 0.65);
-}
-
-
-70% {
-    box-shadow: 0 0 0 8px rgba(32, 168, 102, 0);
-}
-
-100% {
-    box-shadow: 0 0 0 0 rgba(32, 168, 102, 0);
-}
-
-
-}
-
-@keyframes warningPulse {
-0% {
-box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55);
-}
-
-
-70% {
-    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
-}
-
-100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-}
-
-
-}
-
-/* Status text colors */
-.status-box strong.online {
-color: #7dffb2;
-}
-
-.status-box strong.offline {
-color: #ffb3b3;
-}
-
-.status-box strong.warning {
-color: #ffd27a;
-}
-
-/* =========================================
-BETTER BACK HOME BUTTON
+   BACK HOME
 ========================================= */
 
 .back-home {
-display: inline-flex;
-align-items: center;
-gap: 7px;
+    position: absolute;
+    top: 22px;
+    left: 22px;
 
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 
-position: absolute;
-top: 26px;
-left: 26px;
+    padding: 10px 15px;
 
-padding: 10px 17px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.055);
 
-color: white;
-text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
 
-font-size: 13px;
-font-weight: 700;
+    text-decoration: none;
 
-background: rgba(255, 255, 255, 0.10);
+    font-size: 12px;
+    font-weight: 700;
 
-border: 1px solid rgba(255, 255, 255, 0.25);
-border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
-backdrop-filter: blur(10px);
-
-box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.12);
-
-transition:
-    background 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
-
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .back-home:hover {
-background: rgba(255, 255, 255, 0.18);
-
-
-transform: translateY(-2px);
-
-box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.18);
-
-
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.20);
+    transform: translateY(-2px);
 }
 
-.back-home:active {
-transform: translateY(0) scale(0.97);
+/* =========================================
+   CARD
+========================================= */
+
+.driver-card {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    max-width: 430px;
+
+    padding: 34px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(13, 30, 48, 0.96),
+            rgba(6, 18, 31, 0.96)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 24px;
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    animation: cardIn 0.35s ease both;
 }
 
-@media (max-width: 600px) {
-.back-home {
-top: 18px;
-left: 16px;
+.driver-card h1 {
+    margin-top: 20px;
 
+    color: #ffffff;
 
-    padding: 9px 14px;
+    font-size: 28px;
+    font-weight: 850;
+
+    letter-spacing: -0.7px;
+}
+
+.subtitle {
+    margin-top: 8px;
+
+    color: #8495a8;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo-circle {
+    width: 66px;
+    height: 66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 123, 128, 0.30),
+            rgba(8, 123, 128, 0.08)
+        );
+
+    border: 1px solid rgba(8, 123, 128, 0.35);
+    border-radius: 18px;
+
+    font-size: 30px;
+
+    box-shadow:
+        0 12px 30px rgba(8, 123, 128, 0.15);
+}
+
+/* =========================================
+   BUS SELECTION
+========================================= */
+
+.bus-choice {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    margin-top: 12px;
+    padding: 15px 16px;
+
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.bus-choice span {
+    color: #7f91a5;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.bus-choice:hover {
+    background: rgba(8, 123, 128, 0.12);
+    border-color: rgba(8, 123, 128, 0.45);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.20);
+}
+
+.bus-choice:active {
+    transform: scale(0.985);
+}
+
+/* =========================================
+   PASSWORD
+========================================= */
+
+.password-field {
+    margin-top: 24px;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    width: 100%;
+    height: 50px;
+
+    padding: 0 48px 0 15px;
+
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.055);
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+
+    outline: none;
+
+    font-size: 13px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.password-wrapper input::placeholder {
+    color: #65788d;
+}
+
+.password-wrapper input:focus {
+    background: rgba(255, 255, 255, 0.075);
+    border-color: rgba(8, 123, 128, 0.75);
+
+    box-shadow:
+        0 0 0 3px rgba(8, 123, 128, 0.12);
+}
+
+.toggle-password {
+    position: absolute;
+
+    top: 50%;
+    right: 8px;
+
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    color: #8294a8;
+    background: transparent;
+
+    border: none;
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* =========================================
+   PASSWORD REQUIREMENTS
+========================================= */
+
+.password-requirements {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 7px 10px;
+
+    margin-top: 13px;
+}
+
+.password-requirements p {
+    color: #687b8f;
+
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* JS can change these if you already have
+   requirement validation logic */
+
+.password-requirements p.valid {
+    color: #45d88d;
+}
+
+.password-requirements p.invalid {
+    color: #ef6b6b;
+}
+
+/* =========================================
+   MAIN BUTTONS
+========================================= */
+
+.driver-card > button {
+    width: 100%;
+    height: 50px;
+
+    margin-top: 22px;
+
+    border: none;
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #087b80,
+            #075f68
+        );
+
+    color: #ffffff;
 
     font-size: 12px;
-    border-radius: 10px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px rgba(8, 123, 128, 0.22);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
 }
 
+.driver-card > button:hover {
+    filter: brightness(1.10);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 32px rgba(8, 123, 128, 0.30);
+}
+
+.driver-card > button:active {
+    transform: scale(0.985);
+}
+
+/* STOP TRIP */
+
+.driver-card > button.stop {
+    background:
+        linear-gradient(
+            135deg,
+            #b93636,
+            #8f2929
+        );
+
+    box-shadow:
+        0 10px 25px rgba(185, 54, 54, 0.18);
+}
+
+.driver-card > button.stop:hover {
+    box-shadow:
+        0 14px 32px rgba(185, 54, 54, 0.25);
+}
+
+/* =========================================
+   LOGIN MESSAGE
+========================================= */
+
+#loginMessage {
+    min-height: 18px;
+
+    margin-top: 12px;
+
+    text-align: center;
+
+    color: #ef6b6b;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+.bus-info,
+.status-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 12px;
+    padding: 15px 16px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 13px;
+}
+
+.bus-info span,
+.status-box span {
+    color: #8293a8;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.bus-info strong {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.status-box strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #ef6b6b;
+
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+}
+
+.status-box strong::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #ef4444;
+}
+
+/* ONLINE */
+
+.status-box strong.online {
+    color: #45d88d;
+}
+
+.status-box strong.online::before {
+    background: #20a866;
+
+    box-shadow:
+        0 0 0 4px rgba(32, 168, 102, 0.12),
+        0 0 12px rgba(32, 168, 102, 0.75);
+
+    animation: statusPulse 1.8s ease-in-out infinite;
+}
+
+/* OFFLINE */
+
+.status-box strong.offline {
+    color: #ef6b6b;
+}
+
+.status-box strong.offline::before {
+    background: #ef4444;
+}
+
+/* OTHER STATES */
+
+.status-box strong.warning {
+    color: #f5b63b;
+}
+
+.status-box strong.warning::before {
+    background: #f59e0b;
+}
+
+/* PULSING DOT */
+
+@keyframes statusPulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(0.75);
+    }
+}
+
+
+/* =========================================
+   LOCATION
+========================================= */
+
+.location {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 12px;
+}
+
+.location p {
+    padding: 13px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+
+    color: #73869a;
+
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.location strong {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    overflow-wrap: anywhere;
+}
+
+/* =========================================
+   HIDDEN
+========================================= */
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+   ANIMATION
+========================================= */
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .driver-page {
+        align-items: flex-start;
+
+        padding: 82px 15px 25px;
+    }
+
+    .back-home {
+        top: 15px;
+        left: 15px;
+
+        padding: 9px 12px;
+
+        font-size: 11px;
+    }
+
+    .driver-card {
+        max-width: 100%;
+
+        padding: 27px 21px;
+
+        border-radius: 20px;
+    }
+
+    .logo-circle {
+        width: 58px;
+        height: 58px;
+
+        border-radius: 16px;
+
+        font-size: 26px;
+    }
+
+    .driver-card h1 {
+        margin-top: 17px;
+
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 12px;
+    }
+
+    .password-requirements {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .location {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 380px) {
+
+    .driver-page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .driver-card {
+        padding: 24px 17px;
+    }
+
+    .driver-card h1 {
+        font-size: 22px;
+    }
+
+    .bus-choice {
+        padding: 13px;
+    }
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+#loginMessage {
+    min-height: 18px;
+    margin-top: 12px;
+
+    text-align: center;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+#loginMessage.success {
+    color: #45d88d;
+}
+
+#loginMessage.success::before {
+    content: "✓";
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 17px;
+    height: 17px;
+
+    margin-right: 6px;
+
+    border: 1px solid rgba(69, 216, 141, 0.35);
+    border-radius: 50%;
+
+    background: rgba(32, 168, 102, 0.12);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+/* =========================================
+   LOGIN MESSAGE
+========================================= */
+
+#loginMessage {
+    min-height: 20px;
+    margin-top: 12px;
+
+    text-align: center;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+#loginMessage.success-message {
+    color: #45d88d;
+}
+
+#loginMessage.error-message {
+    color: #ef6b6b;
 }
