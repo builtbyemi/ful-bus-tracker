@@ -423,20 +423,17 @@ let selectedBusId = "FUL-001";
 const busInfo = {
 
     "FUL-001": {
-        route: "Main Campus"
+        route: "Adankolo-Felele Campus"
     },
 
     "FUL-002": {
-        route: "Lokoja"
+        route: "Adankolo-Felele Campus"
     },
 
     "FUL-003": {
-        route: "Main Campus"
+        route: "Adankolo-Felele Campus"
     },
 
-    "FUL-004": {
-        route: "Main Campus"
-    }
 };
 
 
@@ -454,6 +451,35 @@ function getTimestamp(value) {
     }
 
     return timestamp;
+}
+
+function formatLastSeen(timestamp) {
+
+    const time = getTimestamp(timestamp);
+
+    if (time === null) {
+        return "Never";
+    }
+
+    const age = Date.now() - time;
+
+    if (age < 5000) {
+        return "Just now";
+    }
+
+    if (age < 60000) {
+        return `${Math.floor(age / 1000)}s ago`;
+    }
+
+    if (age < 3600000) {
+        return `${Math.floor(age / 60000)}m ago`;
+    }
+
+    if (age < 86400000) {
+        return `${Math.floor(age / 3600000)}h ago`;
+    }
+
+    return `${Math.floor(age / 86400000)}d ago`;
 }
 
 
@@ -550,23 +576,14 @@ function getGpsState(bus) {
 // =====================================================
 
 function getBusState(bus) {
+    if (!bus) return "OFFLINE";
 
-    if (!bus) {
-        return "OFFLINE";
+    // Driver has started the trip
+    if (bus.tripStarted === true) {
+        return "ONLINE";
     }
 
-    // Trip is not active.
-    if (bus.tripStarted !== true) {
-        return "OFFLINE";
-    }
-
-    // Driver heartbeat is dead.
-    if (!isHeartbeatAlive(bus)) {
-        return "OFFLINE";
-    }
-
-    // Driver is alive and trip is active.
-    return "ONLINE";
+    return "OFFLINE";
 }
 
 
@@ -1326,28 +1343,42 @@ function updateSelectedBus() {
             "selectedRoute"
         );
 
+    const selectedLastSeen =
+    document.getElementById(
+        "selectedLastSeen"
+    );
+
 
     if (
-        !selectedBus ||
-        !selectedStatus ||
-        !selectedRoute
-    ) {
-        return;
-    }
+    !selectedBus ||
+    !selectedStatus ||
+    !selectedRoute ||
+    !selectedLastSeen
+) {
+    return;
+}
 
 
     const bus =
-        currentBusData[
-            selectedBusId
-        ];
+    currentBusData[
+        selectedBusId
+    ];
+
+selectedBus.textContent =
+    selectedBusId;
+
+selectedLastSeen.textContent =
+    bus?.lastHeartbeat
+        ? formatLastSeen(bus.lastHeartbeat)
+        : "Never";
+
+selectedRoute.textContent =
+    busInfo[selectedBusId]?.route ||
+    "FUL Bus Route";
 
 
-    selectedBus.textContent =
-        selectedBusId;
-
-
-    const state =
-        getBusState(bus);
+const state =
+    getBusState(bus);
 
 
     // =============================================
