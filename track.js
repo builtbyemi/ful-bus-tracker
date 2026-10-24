@@ -1,1471 +1,365 @@
-
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-
+import { BUS_IDS, busState, ageLabel, compass } from "./js/tracking.js";
 import {
-    getDatabase,
-    ref,
-    onValue
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+  CAMPUSES,
+  ROUTE_ID,
+  ROUTE_NAME,
+  VERIFIED_ROUTE,
+  validateGeometry,
+  loadReferenceRoute,
+} from "./js/routes.js";
+import { BusMarkers } from "./js/markers.js";
+import { subscribeFleet } from "./js/firebase-client.js";
 
-
-// =====================================================
-// FIREBASE
-// =====================================================
-
-const firebaseConfig = {
-    apiKey: "AIzaSyB2c9YvF7vdRgl7rKJKnbcmMb8ce06al4c",
-    authDomain: "ful-bus-tracker.firebaseapp.com",
-    projectId: "ful-bus-tracker",
-    storageBucket: "ful-bus-tracker.firebasestorage.app",
-    messagingSenderId: "770210508038",
-    appId: "1:770210508038:web:1a38889aeb4d7f56018287"
+const byId = (id) => document.getElementById(id);
+let map, markers, routeLine, routeOutline, routeRequest, resizeObserver;
+let fleet = {},
+  selected = BUS_IDS[0],
+  connected = false,
+  received = false,
+  unavailable = false,
+  failed = false,
+  offset = 0,
+  disposed = false;
+let unsubscribe = () => {};
+const bounds = CAMPUSES.map((campus) => campus.coordinates);
+const now = () => Date.now() + offset;
+const setText = (id, value) => {
+  if (byId(id).textContent !== value) byId(id).textContent = value;
 };
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-
-// =====================================================
-// SETTINGS
-// =====================================================
-
-// Driver heartbeat is expected every 5 seconds.
-// If we don't receive one for 15 seconds,
-// the driver is considered offline.
-const HEARTBEAT_TIMEOUT = 15000;
-
-// GPS freshness is tracked separately.
-// GPS can be stale without making the bus offline.
-const GPS_FRESH_TIMEOUT = 30000;
-
-
-// =====================================================
-// LOCATIONS
-// =====================================================
-
-const adankolo = [
-    7.7925993,
-    6.7323953
-];
-
-const routePoint = [
-    7.8199372,
-    6.6957385
-];
-
-const felele = [
-    7.8639932,
-    6.6828039
-];
-
-
-// =====================================================
-// MAP
-// =====================================================
-
-const map = L.map("map", {
-    minZoom: 13,
-    maxZoom: 18,
-
-    maxBounds: [
-        [7.77, 6.65],
-        [7.89, 6.75]
-    ],
-
-    maxBoundsViscosity: 1.0,
-    zoomControl: true
-}).setView(
-    [7.828, 6.706],
-    13
-);
-
-
-// =====================================================
-// MAP TILES
-// =====================================================
-
-L.tileLayer(
+function initializeMap() {
+  if (!window.L) {
+    byId("map-failure").hidden = false;
+    return;
+  }
+  map = L.map("map", { zoomControl: false, minZoom: 8, maxZoom: 18 }).fitBounds(
+    bounds,
+    { padding: [55, 110] },
+  );
+  L.control.zoom({ position: "topright" }).addTo(map);
+  L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
+  const tiles = L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 19
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    },
+  ).addTo(map);
+  let tileErrors = 0;
+  tiles.on("tileerror", () => {
+    if (++tileErrors >= 3) {
+      byId("map-failure").textContent =
+        "Map tiles are unavailable. Campus markers and bus details remain available; check your connection.";
+      byId("map-failure").hidden = false;
     }
-).addTo(map);
-
-
-// =====================================================
-// MAP SCALE
-// =====================================================
-
-L.control.scale({
-    imperial: false
-}).addTo(map);
-
-
-// =====================================================
-// ZOOM CONTROL
-// =====================================================
-
-map.zoomControl.setPosition("topleft");
-
-
-// =====================================================
-// LOCATION ICON
-// =====================================================
-
-const locationIcon = L.divIcon({
-
-    className: "location-marker",
-
-    html: `
-        <div style="
-            background:#087b80;
-            color:white;
-            width:34px;
-            height:34px;
-            border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            border:3px solid white;
-            box-shadow:0 4px 12px rgba(0,0,0,.3);
-            font-size:16px;
-        ">
-            📍
-        </div>
-    `,
-
-    iconSize: [34, 34],
-    iconAnchor: [17, 17]
-});
-
-
-// =====================================================
-// ROUTE POINT ICON
-// =====================================================
-
-const routePointIcon = L.divIcon({
-
-    className: "route-point-marker",
-
-    html: `
-        <div style="
-            width:18px;
-            height:18px;
-            background:#ffffff;
-            border:4px solid #087b80;
-            border-radius:50%;
-            box-shadow:0 3px 10px rgba(0,0,0,.3);
-        "></div>
-    `,
-
-    iconSize: [18, 18],
-    iconAnchor: [9, 9]
-});
-
-
-// =====================================================
-// IMPORTANT PLACES
-// =====================================================
-
-// ADANKOLO
-
-L.marker(
-    adankolo,
-    {
-        icon: locationIcon
-    }
-)
-.addTo(map)
-.bindPopup(`
-    <div style="min-width:190px;">
-
-        <strong style="font-size:16px;">
-            College of Health Sciences
-        </strong>
-
-        <br>
-
-        Adankolo
-
-        <br><br>
-
-        <span style="color:#087b80;font-weight:700;">
-            🚌 FUL Bus Route Start
-        </span>
-
-    </div>
-`);
-
-
-// ROUTE CHECKPOINT
-
-L.marker(
-    routePoint,
-    {
-        icon: routePointIcon
-    }
-)
-.addTo(map)
-.bindPopup(`
-    <div style="min-width:180px;">
-
-        <strong style="font-size:15px;">
-            FUL Bus Route
-        </strong>
-
-        <br><br>
-
-        📍 Route checkpoint
-
-    </div>
-`);
-
-
-// FELELE CAMPUS
-
-L.marker(
-    felele,
-    {
-        icon: locationIcon
-    }
-)
-.addTo(map)
-.bindPopup(`
-    <div style="min-width:190px;">
-
-        <strong style="font-size:16px;">
-            Federal University Lokoja
-        </strong>
-
-        <br>
-
-        Felele Campus
-
-        <br><br>
-
-        <span style="color:#087b80;font-weight:700;">
-            🚌 FUL Bus Destination
-        </span>
-
-    </div>
-`);
-
-
-// =====================================================
-// ROAD ROUTE
-// =====================================================
-
-let routeCoordinates = [];
-
-async function loadRoute() {
-
-    try {
-
-        const url =
-            "https://router.project-osrm.org/route/v1/driving/" +
-            `${adankolo[1]},${adankolo[0]};` +
-            `${routePoint[1]},${routePoint[0]};` +
-            `${felele[1]},${felele[0]}` +
-            "?overview=full&geometries=geojson";
-
-        const response =
-            await fetch(url);
-
-        if (!response.ok) {
-            throw new Error("OSRM request failed");
-        }
-
-        const data =
-            await response.json();
-
-        if (
-            !data.routes ||
-            !data.routes.length
-        ) {
-            throw new Error("No route returned");
-        }
-
-        const coordinates =
-            data.routes[0]
-                .geometry
-                .coordinates;
-
-        routeCoordinates =
-            coordinates.map(
-                ([lng, lat]) => [lat, lng]
-            );
-
-
-        // ROUTE OUTLINE
-
-        L.polyline(
-            routeCoordinates,
-            {
-                color: "#ffffff",
-                weight: 10,
-                opacity: 0.65
-            }
-        ).addTo(map);
-
-
-        // MAIN ROUTE
-
-        L.polyline(
-            routeCoordinates,
-            {
-                color: "#087b80",
-                weight: 6,
-                opacity: 0.95
-            }
-        ).addTo(map);
-
-
-        console.log(
-            "✅ FUL road route loaded:",
-            routeCoordinates.length,
-            "points"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "❌ Route error:",
-            error
-        );
-    }
+  });
+  tiles.on("tileload", () => {
+    tileErrors = 0;
+    byId("map-failure").hidden = true;
+  });
+  for (const campus of CAMPUSES) {
+    const popup = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = campus.name;
+    const description = document.createElement("p");
+    description.textContent = campus.description;
+    const note = document.createElement("small");
+    note.textContent = "Campus location · Bus stop not yet confirmed";
+    popup.append(title, description, note);
+    L.marker(campus.coordinates, {
+      icon: L.divIcon({
+        className: "campus-marker",
+        iconSize: [17, 17],
+        iconAnchor: [8, 8],
+      }),
+      title: campus.name,
+      alt: campus.name,
+    })
+      .addTo(map)
+      .bindTooltip(campus.name, {
+        permanent: true,
+        direction: "right",
+        offset: [12, 0],
+        className: "campus-label",
+      })
+      .bindPopup(popup);
+  }
+  markers = new BusMarkers(map, selectBus);
+  resizeObserver = new ResizeObserver(() =>
+    map?.invalidateSize({ pan: false }),
+  );
+  resizeObserver.observe(byId("map"));
 }
-
-loadRoute();
-
-
-// =====================================================
-// BUS ICON SIZE
-// =====================================================
-
-function getBusSize() {
-
-    const zoom =
-        map.getZoom();
-
-    const size =
-        42 - ((zoom - 13) * 3);
-
-    return Math.max(
-        25,
-        Math.min(42, size)
+function badge(element, state) {
+  element.textContent = state.label;
+  element.className =
+    "pill" +
+    (state.live
+      ? " live"
+      : ["stale", "waiting", "weak"].includes(state.key)
+        ? " warning"
+        : "");
+}
+function currentState(bus) {
+  if (unavailable || failed || !received)
+    return { key: "unavailable", label: "Unavailable", live: false };
+  return busState(bus, now(), connected && navigator.onLine);
+}
+function render() {
+  if (disposed) return;
+  let count = 0;
+  for (const id of BUS_IDS) {
+    const bus = fleet[id],
+      state = currentState(bus);
+    if (state.live) count++;
+    badge(byId("status-" + id), state);
+    setText(
+      "route-" + id,
+      bus?.routeId === ROUTE_ID ? ROUTE_NAME : "Route not reported",
     );
-}
-
-
-// =====================================================
-// BUS ICON
-// =====================================================
-
-function createBusIcon(
-    size,
-    rotation = 0
-) {
-
-    return L.divIcon({
-
-        className: "bus-marker",
-
-        html: `
-            <img
-                src="images/bus-2.png"
-                alt="FUL Bus"
-                style="
-                    width:${size}px;
-                    height:${size}px;
-                    object-fit:contain;
-                    display:block;
-                    transform:rotate(${rotation}deg);
-                    transform-origin:center center;
-                    filter:drop-shadow(
-                        0 3px 5px rgba(0,0,0,.4)
-                    );
-                "
-            >
-        `,
-
-        iconSize: [
-            size,
-            size
-        ],
-
-        iconAnchor: [
-            size / 2,
-            size / 2
-        ]
+    markers?.update(
+      id,
+      bus,
+      now(),
+      connected && !failed && !unavailable,
+      selected,
+    );
+  }
+  setText("live-count", count + " live");
+  byId("live-count").classList.toggle("live", count > 0);
+  setText("mobile-count", "· " + count + " live");
+  const status = byId("connection-status");
+  const message = byId("map-notice");
+  if (unavailable) {
+    status.textContent = "Tracking unavailable";
+    message.textContent =
+      "Live tracking is not connected yet. Campus locations are available; current bus availability cannot be confirmed.";
+  } else if (failed) {
+    status.textContent = "Updates unavailable";
+    message.textContent =
+      "Bus updates could not be loaded. Check your connection or try reloading. Last known positions are not live.";
+  } else if (!connected || !navigator.onLine) {
+    status.textContent = received ? "Connection lost" : "Connecting";
+    message.textContent = received
+      ? "Connection lost. Locations are last known; live tracking will resume after fresh updates arrive."
+      : "Connecting to bus updates…";
+  } else if (!received) {
+    status.textContent = "Loading buses";
+    message.textContent = "Connected. Waiting for the first bus update…";
+  } else {
+    status.textContent = "Connected";
+    message.textContent = count
+      ? count +
+        " " +
+        (count === 1 ? "bus is" : "buses are") +
+        " sharing fresh GPS. Select a bus for details."
+      : "No buses are sharing fresh GPS right now. Check back when a driver starts a trip.";
+  }
+  status.classList.toggle(
+    "live",
+    connected && received && !failed && !unavailable,
+  );
+  const empty = byId("empty-state");
+  empty.hidden = count > 0;
+  empty.querySelector("strong").textContent =
+    unavailable || failed
+      ? "Live updates unavailable"
+      : !connected
+        ? "Waiting for connection"
+        : !received
+          ? "Waiting for bus updates"
+          : "No live buses right now";
+  empty.querySelector("p").textContent = unavailable
+    ? "Bus availability cannot be confirmed until tracking is connected."
+    : "Fresh bus locations appear automatically. Stale locations are marked as last known.";
+  const bus = fleet[selected],
+    state = currentState(bus);
+  setText("selected-bus", selected);
+  badge(byId("selected-status"), state);
+  setText(
+    "selected-route",
+    bus?.routeId === ROUTE_ID ? ROUTE_NAME : "Not reported",
+  );
+  const direction = state.live
+    ? bus.speed === 0
+      ? "Stationary"
+      : compass(markers?.heading(selected) ?? null)
+    : "Not determined";
+  setText("selected-direction", direction);
+  setText("selected-gps", ageLabel(bus?.lastGpsUpdate, now()));
+  setText(
+    "selected-accuracy",
+    typeof bus?.accuracy === "number" &&
+      Number.isFinite(bus.accuracy) &&
+      bus.accuracy >= 0
+      ? "± " + Math.round(bus.accuracy) + " m"
+      : "Not available",
+  );
+  byId("focus-bus").disabled = !state.live || !map;
+  if (routeLine)
+    routeLine.setStyle({
+      color: bus?.routeId === ROUTE_ID ? "#286b7b" : "#49618D",
+      weight: bus?.routeId === ROUTE_ID ? 5 : 4,
     });
 }
-
-
-// =====================================================
-// BUS DATA
-// =====================================================
-
-const busMarkers = {};
-
-const busBearings = {};
-
-let currentBusData = {};
-
-let selectedBusId = "FUL-001";
-
-
-// =====================================================
-// BUS INFORMATION
-// =====================================================
-
-const busInfo = {
-
-    "FUL-001": {
-        route: "Adankolo-Felele Campus"
-    },
-
-    "FUL-002": {
-        route: "Adankolo-Felele Campus"
-    },
-
-    "FUL-003": {
-        route: "Adankolo-Felele Campus"
-    },
-
-};
-
-
-// =====================================================
-// TIMESTAMP HELPER
-// =====================================================
-
-function getTimestamp(value) {
-    const time = Number(value);
-
-    if (!Number.isFinite(time) || time <= 0) {
-        return null;
-    }
-
-    // Firebase/server timestamps may sometimes be in seconds
-    if (time < 100000000000) {
-        return time * 1000;
-    }
-
-    return time;
+function selectBus(id) {
+  if (!BUS_IDS.includes(id)) return;
+  selected = id;
+  document.querySelectorAll("[data-bus]").forEach((button) => {
+    const active = button.dataset.bus === id;
+    button.classList.toggle("selected", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  render();
+  if (currentState(fleet[id]).live) markers?.focus(id);
 }
-
-function formatLastSeen(timestamp) {
-
-    const time = getTimestamp(timestamp);
-
-    if (time === null) {
-        return "Never";
-    }
-
-    const age = Date.now() - time;
-
-    if (age < 0) {
-        return "Just now";
-    }
-
-    if (age < 10000) {
-        return "Just now";
-    }
-
-    if (age < 60000) {
-        return `${Math.floor(age / 1000)}s ago`;
-    }
-
-    if (age < 3600000) {
-        return `${Math.floor(age / 60000)}m ago`;
-    }
-
-    if (age < 86400000) {
-        return `${Math.floor(age / 3600000)}h ago`;
-    }
-
-    return `${Math.floor(age / 86400000)}d ago`;
-}
-
-// =====================================================
-// HEARTBEAT CHECK
-// =====================================================
-
-function isHeartbeatAlive(bus) {
-
-    if (!bus) {
-        return false;
-    }
-
-    const heartbeat =
-        getTimestamp(
-            bus.lastHeartbeat
-        );
-
-    if (heartbeat === null) {
-        return false;
-    }
-
-    const age =
-        Date.now() - heartbeat;
-
-    return (
-        age >= 0 &&
-        age <= HEARTBEAT_TIMEOUT
-    );
-}
-
-
-// =====================================================
-// GPS FRESHNESS
-// =====================================================
-
-function getGpsAge(bus) {
-
-    if (!bus) {
-        return null;
-    }
-
-    const gpsTimestamp =
-        getTimestamp(
-            bus.lastGpsUpdate
-        );
-
-    if (gpsTimestamp === null) {
-        return null;
-    }
-
-    const age =
-        Date.now() - gpsTimestamp;
-
-    if (age < 0) {
-        return 0;
-    }
-
-    return age;
-}
-
-
-function getGpsState(bus) {
-
-    const gpsAge =
-        getGpsAge(bus);
-
-    if (gpsAge === null) {
-        return "NO GPS";
-    }
-
-    if (
-        gpsAge <= GPS_FRESH_TIMEOUT
-    ) {
-        return "GPS FRESH";
-    }
-
-    return "GPS STALE";
-}
-
-
-// =====================================================
-// GET BUS STATE
-// =====================================================
-//
-// IMPORTANT:
-//
-// ONLINE/OFFLINE is controlled by:
-//     tripStarted + heartbeat
-//
-// GPS freshness is completely separate.
-//
-// GPS being stale WILL NOT make the bus PAUSED.
-// =====================================================
-
-function getBusState(bus) {
-    if (!bus) return "OFFLINE";
-
-    // Driver has started the trip
-    if (bus.tripStarted === true) {
-        return "ONLINE";
-    }
-
-    return "OFFLINE";
-}
-
-
-// =====================================================
-// CHECK ONLINE BUS
-// =====================================================
-
-function isBusOnline(bus) {
-
-    return getBusState(bus) === "ONLINE";
-}
-
-
-// =====================================================
-// UPDATE BUS CARD
-// =====================================================
-
-function updateBusCard(
-    busId,
-    bus
-) {
-
-    const statusElement =
-        document.getElementById(
-            `busStatus-${busId}`
-        );
-
-    if (!statusElement) {
-        return;
-    }
-
-    const state =
-        getBusState(bus);
-
-
-    if (state === "ONLINE") {
-
-        statusElement.className =
-            "bus-status online";
-
-        statusElement.innerHTML =
-            "<span></span>ONLINE";
-
-        return;
-    }
-
-
-    statusElement.className =
-        "bus-status offline";
-
-    statusElement.innerHTML =
-        "<span></span>OFFLINE";
-}
-
-
-// =====================================================
-// REMOVE BUS MARKER
-// =====================================================
-
-function removeBusMarker(busId) {
-
-    if (!busMarkers[busId]) {
-        return;
-    }
-
-    map.removeLayer(
-        busMarkers[busId]
-    );
-
-    delete busMarkers[busId];
-
-    delete busBearings[busId];
-
-    console.log(
-        `🗑️ ${busId} removed from map`
-    );
-}
-
-
-// =====================================================
-// BUS LOCATION NAME
-// =====================================================
-
-let lastGeocodeTime = 0;
-
-async function getPlaceName(
-    latitude,
-    longitude
-) {
-
-    const now =
-        Date.now();
-
-    if (
-        now - lastGeocodeTime < 15000
-    ) {
-        return null;
-    }
-
-    lastGeocodeTime =
-        now;
-
-    try {
-
-        const url =
-            "https://nominatim.openstreetmap.org/reverse" +
-            `?format=json` +
-            `&lat=${latitude}` +
-            `&lon=${longitude}` +
-            `&zoom=18` +
-            `&addressdetails=1`;
-
-        const response =
-            await fetch(url);
-
-        if (!response.ok) {
-            throw new Error(
-                "Geocoding failed"
-            );
-        }
-
-        const data =
-            await response.json();
-
-        const address =
-            data.address || {};
-
-        return (
-            address.neighbourhood ||
-            address.suburb ||
-            address.quarter ||
-            address.village ||
-            address.town ||
-            address.city_district ||
-            address.city ||
-            address.road ||
-            "Unknown location"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Location name error:",
-            error
-        );
-
-        return null;
-    }
-}
-
-
-// =====================================================
-// UPDATE LOCATION NAME
-// =====================================================
-
-async function updateLocationName(
-    busId,
-    latitude,
-    longitude
-) {
-
-    const place =
-        await getPlaceName(
-            latitude,
-            longitude
-        );
-
-    if (!place) {
-        return;
-    }
-
-    const element =
-        document.getElementById(
-            `busLocationName-${busId}`
-        );
-
-    if (element) {
-
-        element.textContent =
-            `Near ${place}`;
-    }
-}
-
-
-// =====================================================
-// BUS DIRECTION
-// =====================================================
-
-function getBearing(
-    from,
-    to
-) {
-
-    const lat1 =
-        from[0] * Math.PI / 180;
-
-    const lat2 =
-        to[0] * Math.PI / 180;
-
-    const lon1 =
-        from[1] * Math.PI / 180;
-
-    const lon2 =
-        to[1] * Math.PI / 180;
-
-    const y =
-        Math.sin(lon2 - lon1) *
-        Math.cos(lat2);
-
-    const x =
-        Math.cos(lat1) *
-        Math.sin(lat2)
-        -
-        Math.sin(lat1) *
-        Math.cos(lat2) *
-        Math.cos(lon2 - lon1);
-
-    const bearing =
-        Math.atan2(y, x) *
-        180 / Math.PI;
-
-    return (
-        bearing + 360
-    ) % 360;
-}
-
-
-// =====================================================
-// CREATE BUS POPUP
-// =====================================================
-
-function createBusPopup(
-    busId
-) {
-
-    const route =
-        busInfo[busId]?.route ||
-        "FUL Bus Route";
-
-    return `
-        <div style="min-width:210px;">
-
-            <strong style="font-size:16px;">
-                🚌 ${busId}
-            </strong>
-
-            <br><br>
-
-            <span
-                id="busLiveStatus-${busId}"
-                style="
-                    color:#20a866;
-                    font-weight:700;
-                "
-            >
-                ● ONLINE
-            </span>
-
-            <br>
-
-            <span
-                id="busGpsStatus-${busId}"
-                style="
-                    color:#087b80;
-                    font-size:13px;
-                    font-weight:600;
-                "
-            >
-                📡 GPS: Checking...
-            </span>
-
-            <br><br>
-
-            📍
-            <span id="busLocationName-${busId}">
-                Finding location...
-            </span>
-
-            <br><br>
-
-            🛣️ ${route}
-
-        </div>
-    `;
-}
-
-
-// =====================================================
-// UPDATE BUS POPUP STATUS
-// =====================================================
-
-function updateBusPopupStatus(
-    busId,
-    bus
-) {
-
-    const liveElement =
-        document.getElementById(
-            `busLiveStatus-${busId}`
-        );
-
-    const gpsElement =
-        document.getElementById(
-            `busGpsStatus-${busId}`
-        );
-
-
-    // -----------------------------
-    // DRIVER / TRIP STATUS
-    // -----------------------------
-
-    if (liveElement) {
-
-        const state =
-            getBusState(bus);
-
-        if (state === "ONLINE") {
-
-            liveElement.style.color =
-                "#20a866";
-
-            liveElement.textContent =
-                "● ONLINE";
-
-        } else {
-
-            liveElement.style.color =
-                "#ef4444";
-
-            liveElement.textContent =
-                "● OFFLINE";
-        }
-    }
-
-
-    // -----------------------------
-    // GPS STATUS
-    // -----------------------------
-
-    if (gpsElement) {
-
-        const gpsState =
-            getGpsState(bus);
-
-        if (gpsState === "GPS FRESH") {
-
-            gpsElement.style.color =
-                "#087b80";
-
-            gpsElement.textContent =
-                "📡 GPS: FRESH";
-
-        } else if (
-            gpsState === "GPS STALE"
-        ) {
-
-            gpsElement.style.color =
-                "#f59e0b";
-
-            gpsElement.textContent =
-                "📡 GPS: STALE";
-
-        } else {
-
-            gpsElement.style.color =
-                "#888";
-
-            gpsElement.textContent =
-                "📡 GPS: NO DATA";
-        }
-    }
-}
-
-
-// =====================================================
-// UPDATE / CREATE BUS MARKER
-// =====================================================
-
-function updateBusMarker(
-    busId,
-    bus
-) {
-
-    // Only remove marker when the trip is
-    // actually inactive/offline or there
-    // is no usable location at all.
-
-    if (
-        !bus ||
-        bus.status !== "ONLINE" ||
-        bus.tripStarted !== true ||
-        bus.latitude === null ||
-        bus.longitude === null ||
-        bus.latitude === undefined ||
-        bus.longitude === undefined
-    ) {
-
-        removeBusMarker(busId);
-
-        return;
-    }
-
-
-    const latitude =
-        Number(bus.latitude);
-
-    const longitude =
-        Number(bus.longitude);
-
-
-    if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude)
-    ) {
-
-        removeBusMarker(busId);
-
-        return;
-    }
-
-
-    const position = [
-        latitude,
-        longitude
-    ];
-
-
-    // =================================================
-    // CREATE MARKER
-    // =================================================
-
-    if (!busMarkers[busId]) {
-
-        const marker =
-            L.marker(
-                position,
-                {
-                    icon:
-                        createBusIcon(
-                            getBusSize()
-                        ),
-
-                    zIndexOffset: 1000
-                }
-            )
-            .addTo(map);
-
-
-        marker.bindPopup(
-            createBusPopup(
-                busId
-            )
-        );
-
-
-        // Refresh popup whenever it opens.
-        marker.on(
-            "popupopen",
-            () => {
-
-                updateBusPopupStatus(
-                    busId,
-                    currentBusData[busId]
-                );
-            }
-        );
-
-
-        busMarkers[busId] =
-            marker;
-
-        busBearings[busId] =
-            0;
-
-
-        console.log(
-            `🚌 ${busId} marker created`,
-            position
-        );
-
-
-        updateLocationName(
-            busId,
-            position[0],
-            position[1]
-        );
-
-        return;
-    }
-
-
-    // =================================================
-    // MOVE EXISTING MARKER
-    // =================================================
-
-    const marker =
-        busMarkers[busId];
-
-    const currentPosition =
-        marker.getLatLng();
-
-    const previous = [
-
-        currentPosition.lat,
-
-        currentPosition.lng
-    ];
-
-
-    // Calculate direction only
-    // when bus actually moves.
-
-    if (
-        previous[0] !== position[0] ||
-        previous[1] !== position[1]
-    ) {
-
-        const bearing =
-            getBearing(
-                previous,
-                position
-            );
-
-        busBearings[busId] =
-            bearing;
-    }
-
-
-    marker.setLatLng(
-        position
-    );
-
-
-    marker.setIcon(
-        createBusIcon(
-            getBusSize(),
-            busBearings[busId] || 0
-        )
-    );
-
-
-    updateLocationName(
-        busId,
-        position[0],
-        position[1]
-    );
-
-
-    updateBusPopupStatus(
-        busId,
-        bus
-    );
-
-
-    console.log(
-        `📍 ${busId} updated:`,
-        position
-    );
-}
-
-
-// =====================================================
-// FIREBASE — ALL BUSES
-// =====================================================
-
-const busesRef =
-    ref(
-        database,
-        "buses"
-    );
-
-
-onValue(
-    busesRef,
-    (snapshot) => {
-
-        const buses =
-            snapshot.val() || {};
-
-
-        console.log(
-            "🔥 All live buses:",
-            buses
-        );
-
-
-        currentBusData =
-            buses;
-
-        console.log("🕒 FUL-001 LAST SEEN:", buses["FUL-001"]?.lastSeen);
-console.log("💓 FUL-001 HEARTBEAT:", buses["FUL-001"]?.lastHeartbeat);
-console.log(
-    "🕐 FUL-001 FORMATTED:",
-    formatLastSeen(buses["FUL-001"]?.lastSeen)
+initializeMap();
+document
+  .querySelectorAll("[data-bus]")
+  .forEach((button) =>
+    button.addEventListener("click", () => selectBus(button.dataset.bus)),
+  );
+byId("fit-map").addEventListener("click", () =>
+  map?.fitBounds(bounds, {
+    padding: [55, 110],
+    animate: !matchMedia("(prefers-reduced-motion: reduce)").matches,
+  }),
 );
-
-
-        // =============================================
-        // UPDATE ALL BUSES
-        // =============================================
-
-        Object.keys(buses).forEach(
-            (busId) => {
-
-                const bus =
-                    buses[busId];
-
-
-                updateBusCard(
-                    busId,
-                    bus
-                );
-
-
-                updateBusMarker(
-                    busId,
-                    bus
-                );
-
-
-                updateBusPopupStatus(
-                    busId,
-                    bus
-                );
-            }
-        );
-
-
-        // =============================================
-        // REMOVE TRULY INACTIVE BUSES
-        // =============================================
-
-        Object.keys(busMarkers).forEach(
-            (busId) => {
-
-                const bus =
-                    buses[busId];
-
-                if (
-                    !bus ||
-                    bus.status !== "ONLINE" ||
-                    bus.tripStarted !== true ||
-                    bus.latitude === null ||
-                    bus.longitude === null ||
-                    bus.latitude === undefined ||
-                    bus.longitude === undefined
-                ) {
-
-                    removeBusMarker(
-                        busId
-                    );
-                }
-            }
-        );
-
-
-        // =============================================
-        // UPDATE SELECTED BUS
-        // =============================================
-
-        updateSelectedBus();
-    }
-);
-
-
-// =====================================================
-// REFRESH STATUS
-// =====================================================
-
-setInterval(
-    () => {
-
-        Object.keys(
-            currentBusData
-        ).forEach(
-            (busId) => {
-
-                const bus =
-                    currentBusData[busId];
-
-
-                updateBusCard(
-                    busId,
-                    bus
-                );
-
-
-                updateBusPopupStatus(
-                    busId,
-                    bus
-                );
-            }
-        );
-
-
-        updateSelectedBus();
-
-    },
-    3000
-);
-
-
-// =====================================================
-// BUS ICON RESIZE
-// =====================================================
-
-map.on(
-    "zoomend",
-    () => {
-
-        Object.keys(
-            busMarkers
-        ).forEach(
-            (busId) => {
-
-                const marker =
-                    busMarkers[busId];
-
-
-                marker.setIcon(
-                    createBusIcon(
-                        getBusSize(),
-                        busBearings[busId] || 0
-                    )
-                );
-            }
-        );
-    }
-);
-
-
-// =====================================================
-// SELECT BUS
-// =====================================================
-
-window.selectBus =
-function(busId) {
-
-    selectedBusId =
-        busId;
-
-    updateSelectedBus();
-};
-
-
-// =====================================================
-// UPDATE SELECTED BUS
-// =====================================================
-
-function updateSelectedBus() {
-
-    const selectedBus =
-        document.getElementById(
-            "selectedBus"
-        );
-
-    const selectedStatus =
-        document.getElementById(
-            "selectedStatus"
-        );
-
-    const selectedRoute =
-        document.getElementById(
-            "selectedRoute"
-        );
-
-    const selectedLastSeen =
-    document.getElementById(
-        "selectedLastSeen"
-    );
-
-
-    if (
-    !selectedBus ||
-    !selectedStatus ||
-    !selectedRoute ||
-    !selectedLastSeen
-) {
+byId("focus-bus").addEventListener("click", () => markers?.focus(selected));
+byId("sheet-toggle").addEventListener("click", () => {
+  const expanded = byId("bus-panel").classList.toggle("expanded");
+  byId("sheet-toggle").setAttribute("aria-expanded", String(expanded));
+});
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    byId("bus-panel").classList.contains("expanded")
+  ) {
+    byId("bus-panel").classList.remove("expanded");
+    byId("sheet-toggle").setAttribute("aria-expanded", "false");
+    byId("sheet-toggle").focus();
+  }
+});
+byId("show-route").addEventListener("change", async (event) => {
+  routeRequest?.abort();
+  if (routeLine) {
+    routeLine.remove();
+    routeLine = null;
+    routeOutline.remove();
+    routeOutline = null;
+  }
+  if (!event.target.checked) {
+    setText("route-message", "Road reference hidden.");
     return;
-}
-
-
-    const bus =
-    currentBusData[
-        selectedBusId
-    ];
-
-selectedBus.textContent =
-    selectedBusId;
-
-const timestamps = [
-    getTimestamp(bus?.lastSeen),
-    getTimestamp(bus?.lastHeartbeat),
-    getTimestamp(bus?.lastGpsUpdate),
-    getTimestamp(bus?.timestamp)
-].filter(Boolean);
-
-const lastSeenTimestamp =
-    timestamps.length > 0
-        ? Math.max(...timestamps)
-        : null;
-
-selectedLastSeen.textContent =
-    formatLastSeen(lastSeenTimestamp);
-
-selectedRoute.textContent =
-    busInfo[selectedBusId]?.route ||
-    "FUL Bus Route";
-
-
-const state =
-    getBusState(bus);
-
-
-    // =============================================
-    // ONLINE
-    // =============================================
-
-    if (state === "ONLINE") {
-
-        const gpsState =
-            getGpsState(bus);
-
-        selectedStatus.textContent =
-            gpsState === "GPS STALE"
-                ? "ONLINE • GPS STALE"
-                : "ONLINE";
-
-        selectedStatus.style.color =
-            gpsState === "GPS STALE"
-                ? "#f59e0b"
-                : "#20a866";
-
-        return;
-    }
-
-
-    // =============================================
-    // OFFLINE
-    // =============================================
-
-    selectedStatus.textContent =
-        "OFFLINE";
-
-    selectedStatus.style.color =
-        "#ef4444";
-}
-
-
-// =====================================================
-// TOGGLE BUS PANEL
-// =====================================================
-
-window.toggleBusPanel =
-function() {
-
-    const panel =
-        document.querySelector(
-            ".bus-panel"
-        );
-
-    if (!panel) {
-        return;
-    }
-
-    panel.classList.toggle(
-        "hidden"
+  }
+  if (!map) {
+    event.target.checked = false;
+    setText("route-message", "Load the map before showing a road reference.");
+    return;
+  }
+  routeRequest = new AbortController();
+  const request = routeRequest;
+  const timeout = setTimeout(() => request.abort(), 10_000);
+  setText("route-message", "Loading road reference…");
+  try {
+    const geometry = VERIFIED_ROUTE
+      ? validateGeometry(VERIFIED_ROUTE)
+      : await loadReferenceRoute(request.signal);
+    if (!geometry) throw new Error("Invalid route geometry");
+    if (request.signal.aborted || !byId("show-route").checked) return;
+    routeOutline = L.polyline(geometry, {
+      color: "#fff",
+      weight: 9,
+      opacity: 0.85,
+    }).addTo(map);
+    routeLine = L.polyline(geometry, {
+      color: "#49618D",
+      weight: 4,
+      dashArray: VERIFIED_ROUTE ? null : "8 8",
+      opacity: 0.85,
+    }).addTo(map);
+    routeLine.bindTooltip(
+      VERIFIED_ROUTE
+        ? "University-verified route"
+        : "Driving reference · Not an official bus route",
     );
-};
-
-
-// =====================================================
-// FINISHED
-// =====================================================
-
-console.log(
-    "🚌 FUL Bus Tracker initialized successfully."
-);
-
+    setText(
+      "route-message",
+      VERIFIED_ROUTE
+        ? "University-verified route."
+        : "OSRM driving reference only. Not verified as a university bus route; no timetable or arrival estimate.",
+    );
+    render();
+  } catch {
+    if (request === routeRequest && byId("show-route").checked) {
+      setText(
+        "route-message",
+        "Road reference unavailable. Campus locations remain visible. Toggle to retry.",
+      );
+      byId("show-route").checked = false;
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+render();
+const ticker = setInterval(render, 1000);
+const connectionTimeout = setTimeout(() => {
+  if (!received && !unavailable && !failed) {
+    failed = true;
+    render();
+  }
+}, 15_000);
+subscribeFleet({
+  onUnavailable() {
+    unavailable = true;
+    render();
+  },
+  onConnection(value) {
+    connected = value;
+    render();
+  },
+  onOffset(value) {
+    offset = value;
+    render();
+  },
+  onBuses(value) {
+    fleet = value;
+    received = true;
+    failed = false;
+    render();
+  },
+  onError() {
+    failed = true;
+    connected = false;
+    render();
+  },
+})
+  .then((stop) => {
+    if (disposed) stop();
+    else unsubscribe = stop;
+  })
+  .catch(() => {
+    failed = true;
+    render();
+  });
+window.addEventListener("offline", () => {
+  connected = false;
+  render();
+});
+document.addEventListener("visibilitychange", render);
+window.addEventListener("pagehide", () => {
+  disposed = true;
+  clearInterval(ticker);
+  clearTimeout(connectionTimeout);
+  unsubscribe();
+  routeRequest?.abort();
+  resizeObserver?.disconnect();
+  markers?.destroy();
+  map?.remove();
+  map = null;
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) location.reload();
+});

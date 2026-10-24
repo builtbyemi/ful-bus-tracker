@@ -1,834 +1,390 @@
-
-
-
-/* =========================================
-   FUL BUS TRACKER — LANDING PAGE
-   Modern Mobility / Transport UI
-========================================= */
-
-
-/* =========================================
-   RESET
-========================================= */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+﻿.brand-dot {
+  color: var(--sky);
 }
-
-html,
-body {
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  align-items: center;
+  gap: 64px;
+  padding-block: 76px 72px;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  font-weight: 750;
+  color: var(--sky-ink);
+  background: #eaf3f6;
+  padding: 7px 11px;
+  border-radius: 5px;
+  margin-bottom: 25px;
+}
+.hero-tag > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sky-ink);
+}
+.hero h1 {
+  font-size: clamp(42px, 4.6vw, 62px);
+  line-height: 1.09;
+  font-weight: 750;
+  letter-spacing: -0.055em;
+}
+.hero h1 > span {
+  color: var(--sky-ink);
+}
+.hero-copy > p {
+  color: var(--muted);
+  max-width: 440px;
+  font-size: 15px;
+  line-height: 1.85;
+  margin-top: 24px;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-block: 30px 22px;
+}
+.hero-note {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+.hero-note .icon {
+  width: 15px;
+  height: 15px;
+}
+.journey-visual {
+  background: white;
+  border: 1px solid #dce5e9;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px #25344b07;
+  transform: rotate(-1deg);
+}
+.visual-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  gap: 10px;
+}
+.visual-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.overview-label {
+  font-size: 9px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+.campus-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.visual-caption {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 18px 20px 10px;
+}
+.visual-caption > div:nth-child(2) {
+  flex: 1;
+}
+.visual-caption strong {
+  display: block;
+  font-size: 12px;
+}
+.visual-caption span {
+  font-size: 10px;
+  color: var(--muted);
+}
+.visual-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--sky-ink);
+}
+.illustration-note {
+  font-size: 9px;
+  color: var(--muted);
+  padding: 0 20px 16px;
+  text-align: center;
+}
+.benefits-strip {
+  background: white;
+  border-block: 1px solid var(--border);
+}
+.benefits-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-block: 22px;
+}
+.benefits-inner > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.benefits-inner .icon {
+  color: var(--navy);
+  width: 18px;
+}
+.section {
+  padding-block: 75px 70px;
+}
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+}
+.section h2,
+.features-section h2 {
+  font-size: 30px;
+  margin-top: 12px;
+}
+.section-heading > p {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 235px;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 34px;
+}
+.steps article {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 26px;
+  border-radius: 12px;
+  position: relative;
+}
+.step-number {
+  position: absolute;
+  right: 24px;
+  top: 22px;
+  color: #5d6c80;
+  font-size: 13px;
+  font-weight: 600;
+}
+.step-icon {
+  width: 42px;
+  height: 42px;
+  background: var(--soft);
+  color: var(--sky-ink);
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.steps h3,
+.feature h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.steps p,
+.feature p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.85;
+}
+.route-section {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr;
+  gap: 90px;
+  padding-block: 42px 65px;
+}
+.route-copy h2 {
+  font-size: 36px;
+  margin-block: 16px;
+}
+.route-copy > p {
+  max-width: 370px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.route-copy .text-link {
+  color: var(--navy);
+  margin-top: 15px;
+}
+.campus-card {
+  padding: 25px;
+}
+.campus-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.campus-card-head > span {
+  font-size: 8px;
+  color: var(--muted);
+  margin-left: auto;
+  letter-spacing: 0.08em;
+}
+.campus-stop {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 8px 6px;
+  position: relative;
+}
+.campus-stop i {
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--sky);
+  background: white;
+  border-radius: 50%;
+  z-index: 1;
+}
+.campus-stop:nth-child(2)::after {
+  content: "";
+  position: absolute;
+  height: 65px;
+  border-left: 2px dashed #c7dce2;
+  left: 13px;
+  top: 44px;
+}
+.campus-stop strong {
+  font-size: 13px;
+}
+.campus-stop p {
+  font-size: 11px;
+  color: var(--muted);
+}
+.campus-stop > span {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+}
+.route-note {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.features-section {
+  display: grid;
+  grid-template-columns: 1.2fr repeat(3, 1fr);
+  gap: 36px;
+  padding-block: 38px 80px;
+}
+.features-section h2 {
+  font-size: 26px;
+}
+.features-section .eyebrow {
+  font-size: 9px;
+}
+.feature > .icon {
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+@media (max-width: 960px) {
+  .hero {
+    gap: 28px;
+  }
+  .benefits-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .features-section {
+    grid-template-columns: 1fr 1fr;
+  }
+  .route-section {
+    gap: 32px;
+  }
+}
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding-block: 40px;
+    gap: 38px;
+  }
+  .hero h1 {
+    font-size: 50px;
+  }
+  .hero-copy > p {
+    font-size: 14px;
+  }
+  .journey-visual {
+    transform: none;
+    max-width: 520px;
     width: 100%;
-    min-height: 100%;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    color: #ffffff;
-    background: #071321;
-    overflow-x: hidden;
-}
-
-
-/* =========================================
-   MAIN TRACKER
-========================================= */
-
-.tracker {
-    position: relative;
-
-    width: 100%;
-    min-height: 100vh;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 120px 24px 150px;
-
-    overflow: hidden;
-
-    background:
-        radial-gradient(
-            circle at 50% 45%,
-            rgba(8, 123, 128, 0.20),
-            transparent 38%
-        ),
-        #071321;
-}
-
-
-/* =========================================
-   BACKGROUND BUS IMAGE
-========================================= */
-
-.tracker::before {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background-image: url("images/bus.jfif");
-
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    opacity: 0.14;
-
-    transform: scale(1.03);
-
-    z-index: 0;
-}
-
-
-/* =========================================
-   DARK OVERLAY
-========================================= */
-
-.tracker::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(4, 13, 25, 0.88) 0%,
-            rgba(7, 19, 33, 0.62) 45%,
-            rgba(4, 13, 25, 0.94) 100%
-        );
-
-    z-index: 1;
-}
-
-
-/* =========================================
-   SUBTLE GRID / MAP FEEL
-========================================= */
-
-.tracker {
-    isolation: isolate;
-}
-
-.tracker .tracker-content::before {
-    content: "";
-
-    position: absolute;
-
-    width: 700px;
-    height: 700px;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    border-radius: 50%;
-
-    background:
-        repeating-radial-gradient(
-            circle,
-            transparent 0,
-            transparent 74px,
-            rgba(255, 255, 255, 0.025) 75px,
-            transparent 76px
-        );
-
-    pointer-events: none;
-
-    z-index: -1;
-}
-
-
-/* =========================================
-   MAIN CONTENT
-========================================= */
-
-.tracker-content {
-    position: relative;
-
-    z-index: 3;
-
-    width: 100%;
-    max-width: 780px;
-
-    margin: 0 auto;
-
-    animation: heroReveal 0.8s ease both;
-}
-
-
-/* =========================================
-   SMALL BRAND LABEL
-========================================= */
-
-.tracker-content::after {
-    content: "●  LIVE CAMPUS TRANSPORT";
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 22px;
-
-    padding: 9px 16px;
-
-    border: 1px solid rgba(32, 168, 102, 0.35);
-
-    border-radius: 999px;
-
-    background: rgba(32, 168, 102, 0.08);
-
-    color: #62d79d;
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.8px;
-
-    order: -1;
-}
-
-
-/* =========================================
-   MAIN TITLE
-========================================= */
-
-.tracker-content h1 {
-    margin: 0 0 16px;
-
-    font-size: clamp(48px, 8vw, 92px);
-
-    font-weight: 900;
-
-    line-height: 0.9;
-
-    letter-spacing: -5px;
-
-    color: #ffffff;
-
-    text-shadow:
-        0 4px 30px rgba(0, 0, 0, 0.25);
-}
-
-
-/* =========================================
-   SCHOOL NAME
-========================================= */
-
-.tracker-content h2 {
-    margin: 0 0 24px;
-
-    font-size: clamp(18px, 3vw, 25px);
-
-    font-weight: 500;
-
-    line-height: 1.3;
-
-    letter-spacing: 0.2px;
-
-    color: #9fb0c7;
-}
-
-
-/* =========================================
-   DESCRIPTION
-========================================= */
-
-.tracker-content p {
-    width: 100%;
-    max-width: 600px;
-
-    margin: 0 auto;
-
-    font-size: 16px;
-
-    line-height: 1.75;
-
-    color: #d7e0ec;
-
-    opacity: 0.92;
-}
-
-
-/* =========================================
-   ACTION BUTTONS
-========================================= */
-
-.actions,
-.action-buttons {
-    width: 100%;
-
-    margin-top: 40px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
+    margin: auto;
+  }
+  .section {
+    padding-block: 45px;
+  }
+  .section-heading {
+    display: block;
+  }
+  .section-heading > p {
+    margin-top: 15px;
+    max-width: none;
+  }
+  .steps {
+    grid-template-columns: 1fr;
     gap: 14px;
-
-    flex-wrap: wrap;
-}
-
-
-/* =========================================
-   ALL BUTTON LINKS
-========================================= */
-
-.actions a,
-.action-buttons a {
-    position: relative;
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 200px;
-    height: 56px;
-
-    padding: 0 28px;
-
-    border-radius: 14px;
-
-    text-decoration: none;
-
-    font-size: 13px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.8px;
-
-    line-height: 1;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        border-color 0.25s ease,
-        box-shadow 0.25s ease,
-        color 0.25s ease;
-}
-
-
-/* =========================================
-   TRACK MY BUS
-========================================= */
-
-.track-btn {
-    background: #087b80;
-
-    color: #ffffff;
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    box-shadow:
-        0 12px 35px rgba(8, 123, 128, 0.30);
-}
-
-.track-btn::after {
-    content: "→";
-
-    margin-left: 10px;
-
-    font-size: 17px;
-
-    transition:
-        transform 0.25s ease;
-}
-
-.track-btn:hover {
-    transform: translateY(-4px);
-
-    background: #099398;
-
-    box-shadow:
-        0 18px 42px rgba(8, 123, 128, 0.40);
-}
-
-.track-btn:hover::after {
-    transform: translateX(4px);
-}
-
-.track-btn:active {
-    transform: translateY(-1px);
-}
-
-
-/* =========================================
-   DRIVER LOGIN
-========================================= */
-
-.driver-login {
-    background: rgba(255, 255, 255, 0.04);
-
-    color: #ffffff;
-
-    border: 1px solid rgba(255, 255, 255, 0.20);
-
-    backdrop-filter: blur(12px);
-
-    -webkit-backdrop-filter: blur(12px);
-}
-
-.driver-login:hover {
-    transform: translateY(-4px);
-
-    background: rgba(255, 255, 255, 0.09);
-
-    border-color: rgba(255, 255, 255, 0.35);
-
-    box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.20);
-}
-
-.driver-login:active {
-    transform: translateY(-1px);
-}
-
-
-/* =========================================
-   SCROLLING TICKER
-========================================= */
-
-.scrolling-text {
-    position: absolute;
-
-    top: 24px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: min(900px, calc(100% - 32px));
-
-    height: 42px;
-
-    overflow: hidden;
-
-    display: flex;
-    align-items: center;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, 0.045);
-
-    backdrop-filter: blur(14px);
-
-    -webkit-backdrop-filter: blur(14px);
-
-    z-index: 10;
-
-    box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.16);
-}
-
-
-/* =========================================
-   TICKER TRACK
-========================================= */
-
-.scrolling-track {
-    display: flex;
-
-    width: max-content;
-
-    white-space: nowrap;
-
-    animation:
-        continuousScroll 18s linear infinite;
-}
-
-.scrolling-track span {
-    display: block;
-
-    padding-right: 90px;
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
-
-    line-height: 1;
-
-    color: #b9c8da;
-}
-
-
-/* =========================================
-   TICKER ANIMATION
-========================================= */
-
-@keyframes continuousScroll {
-
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-
-/* =========================================
-   SCHOOL BRANDING
-========================================= */
-
-.school-brand {
-    position: relative;
-    z-index: 5;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    gap: 5px;
-
-    width: max-content;
-
-    margin: 60px auto 0;
-}
-
-
-/* =========================================
-   FUL LOGO
-========================================= */
-
-.school-brand img {
-    display: block;
-
-    width: 55px;
-    height: 55px;
-
-    object-fit: contain;
-
-    filter: drop-shadow(
-        0 5px 15px rgba(0, 0, 0, 0.3)
-    );
-}
-
-
-/* =========================================
-   VERSION
-========================================= */
-
-.school-brand span {
-    display: block;
-
+  }
+  .steps article {
+    padding: 24px;
+  }
+  .step-icon {
+    margin-bottom: 15px;
+  }
+  .route-section {
+    grid-template-columns: 1fr;
+    padding-block: 12px 40px;
+  }
+  .features-section {
+    gap: 28px;
+    padding-bottom: 45px;
+  }
+  .features-section > div:first-child {
+    grid-column: 1/-1;
+  }
+  .features-section h2 br {
+    display: none;
+  }
+  .benefits-inner {
+    gap: 18px 10px;
+  }
+  .benefits-inner > span {
     font-size: 10px;
-
-    line-height: 1;
-
-    letter-spacing: 1.3px;
-
-    color: #91a2b8;
-
-    opacity: 0.75;
+  }
 }
-
-
-/* =========================================
-   HERO ANIMATION
-========================================= */
-
-@keyframes heroReveal {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(18px);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0);
-    }
-}
-
-
-/* =========================================
-   BUTTON ACCESSIBILITY
-========================================= */
-
-.actions a:focus-visible,
-.action-buttons a:focus-visible {
-    outline: 2px solid #5ee0d1;
-
-    outline-offset: 4px;
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (max-width: 600px) {
-
-    .tracker {
-        min-height: 100svh;
-
-        padding:
-            105px
-            20px
-            125px;
-    }
-
-
-    /* Ticker */
-
-    .scrolling-text {
-        top: 17px;
-
-        width: calc(100% - 24px);
-
-        height: 38px;
-    }
-
-    .scrolling-track span {
-        font-size: 10px;
-
-        letter-spacing: 1px;
-
-        padding-right: 60px;
-    }
-
-
-    /* Content */
-
-    .tracker-content {
-        width: 100%;
-
-        max-width: 500px;
-    }
-
-
-    /* Live Label */
-
-    .tracker-content::after {
-        margin-bottom: 20px;
-
-        padding: 8px 13px;
-
-        font-size: 9px;
-
-        letter-spacing: 1.4px;
-    }
-
-
-    /* Title */
-
-    .tracker-content h1 {
-        font-size: clamp(
-            43px,
-            13vw,
-            62px
-        );
-
-        letter-spacing: -3px;
-
-        line-height: 0.92;
-
-        margin-bottom: 14px;
-    }
-
-
-    /* School */
-
-    .tracker-content h2 {
-        font-size: 18px;
-
-        margin-bottom: 17px;
-    }
-
-
-    /* Description */
-
-    .tracker-content p {
-        max-width: 410px;
-
-        font-size: 14px;
-
-        line-height: 1.7;
-    }
-
-
-    /* Buttons */
-
-    .actions,
-    .action-buttons {
-        margin-top: 31px;
-
-        flex-direction: column;
-
-        gap: 10px;
-    }
-
-    .actions a,
-    .action-buttons a {
-        width: min(100%, 280px);
-
-        min-width: 0;
-
-        height: 53px;
-
-        border-radius: 13px;
-
-        font-size: 12px;
-    }
-
-
-    /* Branding */
-
-    .school-brand {
-    margin-top: 200px;
-    padding: 0;
-    gap: 5px;
-}
-
-    .school-brand img {
-        width: 48px;
-        height: 48px;
-    }
-
-    .school-brand span {
-        font-size: 9px;
-    }
-}
-
-
-/* =========================================
-   SMALL PHONES
-========================================= */
-
 @media (max-width: 380px) {
-
-    .tracker {
-        padding:
-            100px
-            15px
-            115px;
-    }
-
-
-    .tracker-content::after {
-        font-size: 8px;
-
-        padding: 7px 11px;
-    }
-
-
-    .tracker-content h1 {
-        font-size: 39px;
-
-        letter-spacing: -2.5px;
-    }
-
-
-    .tracker-content h2 {
-        font-size: 16px;
-    }
-
-
-    .tracker-content p {
-        font-size: 13px;
-    }
-
-
-    .actions a,
-    .action-buttons a {
-        width: 250px;
-
-        height: 50px;
-    }
-
-
-    .school-brand img {
-        width: 44px;
-        height: 44px;
-    }
-}
-
-
-/* =========================================
-   REDUCED MOTION
-========================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    html {
-        scroll-behavior: auto;
-    }
-
-    .tracker-content {
-        animation: none;
-    }
-
-    .scrolling-track {
-        animation: none;
-    }
-
-    .actions a,
-    .action-buttons a,
-    .track-btn::after {
-        transition: none;
-    }
-}
-
-/* =========================================
-   LOCK LANDING PAGE TO ONE SCREEN
-========================================= */
-
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.tracker {
-    width: 100%;
-    height: 100vh;
-    height: 100svh;
-    min-height: 0;
-
-    overflow: hidden;
-}
-
-@media (max-width: 600px) {
-
-    .tracker {
-        height: 100svh;
-        min-height: 0;
-        overflow: hidden;
-
-        padding: 100px 20px 20px;
-    }
-
-    .school-brand {
-        margin-top: 45px;
-    }
+  .hero h1 {
+    font-size: 43px;
+  }
+  .hero-actions .button {
+    padding-inline: 18px;
+  }
+  .features-section {
+    grid-template-columns: 1fr;
+  }
+  .campus-card {
+    padding: 20px;
+  }
 }

@@ -1,2 +1,1 @@
-
-
+import '../script.js';

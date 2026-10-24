@@ -1,1105 +1,604 @@
-
-
-/* =========================================
-   FUL BUS TRACKER — LIVE MAP
-   Modern Transit Dashboard
-========================================= */
-
-
-/* =========================================
-   RESET
-========================================= */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+.tracking-page {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
-
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+.tracking-page .site-header {
+  height: 80px;
 }
-
-body {
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background: #071321;
-    color: #ffffff;
+.tracking-page .header-inner {
+  padding: 0 28px;
 }
-
-
-/* =========================================
-   MAP
-========================================= */
-
-#map {
-    position: fixed;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100vh;
-
-    z-index: 1;
+.tracking-page .header-inner nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 12px;
 }
-
-
-/* =========================================
-   MAP HEADER
-========================================= */
-
-.map-header {
-    position: fixed;
-
-    top: 14px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: calc(100% - 32px);
-    max-width: 1200px;
-
-    height: 62px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 12px 0 14px;
-
-    background: rgba(7, 19, 33, 0.90);
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    border-radius: 18px;
-
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.28);
-
-    z-index: 1000;
+.tracker-nav-active {
+  font-weight: 650;
+  color: var(--navy);
 }
-
-
-/* =========================================
-   BACK HOME
-========================================= */
-
-.back-home {
-    display: inline-flex;
-
-    align-items: center;
-    gap: 8px;
-
-    padding: 9px 14px;
-
-    color: #ffffff;
-
-    background: rgba(255, 255, 255, 0.06);
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    border-radius: 11px;
-
-    text-decoration: none;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.2px;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        border-color 0.2s ease;
+.tracking-layout {
+  height: calc(100% - 80px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 365px;
 }
-
-.back-home:hover {
-    background: rgba(255, 255, 255, 0.13);
-
-    border-color: rgba(255, 255, 255, 0.25);
-
-    transform: translateY(-2px);
+.map-area {
+  position: relative;
+  min-width: 0;
+  background: #eaf0ee;
 }
-
-.back-home:active {
-    transform: scale(0.97);
+.map-area #map {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  background: #eaf0ee;
 }
-
-
-/* =========================================
-   BACK ARROW
-========================================= */
-
-.back-arrow {
-    font-size: 17px;
-
-    line-height: 1;
-
-    transition:
-        transform 0.2s ease;
+.map-top {
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 400;
 }
-
-.back-home:hover .back-arrow {
-    transform: translateX(-3px);
+.map-title {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 10px 14px;
 }
-
-
-/* =========================================
-   HEADER TITLE
-========================================= */
-
-.map-header h1 {
-    position: absolute;
-
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 18px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.5px;
-
-    white-space: nowrap;
+.map-top > .pill {
+  background: white;
+  border: 1px solid var(--border);
+  align-self: center;
 }
-
-
-/* =========================================
-   BUS STATUS NAV BUTTON
-========================================= */
-
-.bus-status-nav {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 7px;
-
-    padding: 10px 15px;
-
-    border: 1px solid rgba(32, 168, 102, 0.30);
-
-    border-radius: 11px;
-
-    background: rgba(32, 168, 102, 0.10);
-
-    color: #69dca4;
-
-    font-size: 12px;
-
-    font-weight: 800;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        border-color 0.2s ease;
+.map-notice {
+  position: absolute;
+  top: 84px;
+  left: 24px;
+  max-width: 395px;
+  right: 80px;
+  z-index: 400;
+  background: #fffffff2;
+  font-size: 12px;
+  box-shadow: 0 2px 8px #25344b05;
 }
-
-.bus-status-nav::before {
-    content: "";
-
-    width: 7px;
-    height: 7px;
-
-    border-radius: 50%;
-
-    background: #20a866;
-
-    box-shadow:
-        0 0 0 4px rgba(32, 168, 102, 0.12),
-        0 0 10px rgba(32, 168, 102, 0.7);
+.map-controls {
+  position: absolute;
+  right: 22px;
+  top: 154px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 400;
 }
-
-.bus-status-nav:hover {
-    background: rgba(32, 168, 102, 0.18);
-
-    border-color: rgba(32, 168, 102, 0.50);
-
-    transform: translateY(-2px);
+.map-legend {
+  position: absolute;
+  bottom: 38px;
+  left: 24px;
+  background: #ffffffed;
+  display: flex;
+  gap: 15px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 9px;
+  z-index: 400;
 }
-
-.bus-status-nav:active {
-    transform: scale(0.97);
+.map-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
-
-/* =========================================
-   BUS STATUS PANEL
-========================================= */
-
+.map-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend-campus {
+  background: white;
+  border: 2px solid var(--navy);
+}
+.legend-live {
+  background: var(--sky);
+}
+.legend-stale {
+  background: #7a8797;
+}
+.map-failure {
+  position: absolute;
+  inset: 45% 25px auto;
+  z-index: 400;
+}
 .bus-panel {
-    position: fixed;
-
-    top: 92px;
-    right: 20px;
-
-    width: 360px;
-
-    max-width: calc(100% - 40px);
-
-    max-height: calc(100vh - 112px);
-
+  background: white;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.sheet-toggle {
+  display: none;
+}
+.panel-heading {
+  padding: 26px 23px 18px;
+}
+.panel-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+}
+.panel-heading > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+.panel-heading h1 {
+  font-size: 24px;
+}
+.panel-heading > p {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+.bus-list {
+  display: grid;
+  gap: 8px;
+  padding: 0 20px;
+}
+.bus-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  text-align: left;
+  min-height: 74px;
+}
+.bus-card:hover {
+  background: var(--bg);
+}
+.bus-card.selected {
+  border-color: var(--sky);
+  background: #f3f9fa;
+  box-shadow: 0 0 0 1px var(--sky);
+}
+.bus-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 39px;
+  background: var(--bg);
+  border-radius: 8px;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+.selected .bus-icon {
+  background: #e2f0f3;
+}
+.bus-name {
+  flex: 1;
+  min-width: 0;
+}
+.bus-name strong {
+  font-size: 13px;
+  display: block;
+}
+.bus-name small {
+  font-size: 9px;
+  color: var(--muted);
+  display: block;
+}
+.bus-card .pill {
+  font-size: 9px;
+  padding: 4px 7px;
+  gap: 5px;
+}
+.empty-state {
+  margin: 18px 20px;
+  display: flex;
+  gap: 10px;
+  background: var(--bg);
+  padding: 13px;
+  border-radius: 9px;
+}
+.empty-state > .icon {
+  width: 18px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.empty-state strong {
+  font-size: 11px;
+}
+.empty-state p {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.selected-card {
+  margin: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 21px;
+}
+.selected-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.selected-heading .eyebrow {
+  font-size: 9px;
+}
+.selected-card h2 {
+  font-size: 22px;
+  margin-top: 8px;
+}
+.bus-facts {
+  margin: 18px 0 12px;
+  font-size: 11px;
+}
+.bus-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+.bus-facts dt {
+  color: var(--muted);
+}
+.bus-facts dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  max-width: 57%;
+}
+.detail-note {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.route-panel {
+  margin: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 17px;
+}
+.route-panel-heading {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.route-panel h2 {
+  font-size: 13px;
+  color: var(--ink);
+}
+.route-panel .icon {
+  width: 18px;
+}
+.route-stops {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 650;
+  margin: 18px 0 12px;
+}
+.route-stops i {
+  flex: 1;
+  border-top: 2px dotted var(--sky);
+}
+.route-panel > p {
+  font-size: 10px;
+  color: var(--muted);
+}
+.route-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.route-switch input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--navy);
+}
+.route-message {
+  font-size: 9px !important;
+}
+.panel-footer {
+  padding: 0 20px 24px;
+  font-size: 9px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.panel-footer > .icon {
+  width: 14px;
+}
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  margin-top: 280px !important;
+  margin-right: 23px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+.leaflet-control-zoom a {
+  width: 42px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  color: var(--ink) !important;
+}
+.leaflet-control-attribution {
+  font-size: 9px !important;
+}
+.leaflet-container {
+  font-family: Inter, Arial, sans-serif;
+}
+.leaflet-control-scale {
+  margin-bottom: 6px !important;
+  margin-left: 24px !important;
+}
+.campus-marker {
+  background: white;
+  border: 3px solid var(--navy);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px #25344b20;
+}
+.campus-label {
+  font-size: 10px;
+  font-weight: 650;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.bus-map-marker {
+  background: none;
+  border: 0;
+}
+.bus-marker-body {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 2px solid var(--navy);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px #25344b25;
+  color: var(--navy);
+  display: grid;
+  place-items: center;
+}
+.bus-marker-body svg {
+  width: 24px;
+  height: 32px;
+  transform: rotate(var(--heading, 0deg));
+  transition: transform 0.5s ease;
+}
+.bus-marker-body::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  border: 1px solid transparent;
+}
+.bus-marker-body.is-selected {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 4px #4cacc12b;
+}
+.bus-marker-body.is-moving::before {
+  border-color: #4cacc17a;
+  animation: marker-breathe 2s ease-in-out infinite;
+}
+.bus-marker-body.is-stale {
+  color: #758298;
+  border-color: #8896a6;
+  background: #f3f5f7;
+}
+.bus-marker-label {
+  position: absolute;
+  top: 49px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 750;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.is-stale .bus-marker-label {
+  color: var(--muted);
+}
+@keyframes marker-breathe {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (max-width: 1000px) {
+  .tracking-layout {
+    grid-template-columns: minmax(0, 1fr) 335px;
+  }
+  .tracking-page .header-inner {
+    padding-inline: 20px;
+  }
+  .tracking-page .header-inner nav {
+    gap: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .tracking-page .site-header {
+    height: 70px;
+  }
+  .tracking-page .header-inner {
+    padding-inline: 14px;
+    gap: 8px;
+  }
+  .tracking-page .header-inner nav {
+    gap: 0;
+  }
+  .tracking-page .brand strong {
+    font-size: 13px;
+  }
+  .tracking-page .brand small {
+    font-size: 7px;
+  }
+  .tracking-page .brand img {
+    width: 32px;
+    height: 40px;
+  }
+  .home-link,
+  .tracker-nav-active {
+    display: none !important;
+  }
+  .tracking-page nav .button {
+    font-size: 10px;
+    padding: 9px 10px;
+    min-height: 42px;
+  }
+  .tracking-page nav .icon {
+    display: none;
+  }
+  .tracking-layout {
+    height: calc(100% - 70px);
+    display: block;
+    position: relative;
+  }
+  .map-area {
+    height: 100%;
+  }
+  .map-top {
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    gap: 8px;
+  }
+  .map-title {
+    font-size: 10px;
+    padding: 8px 10px;
+  }
+  .map-top .pill {
+    font-size: 9px;
+  }
+  .map-notice {
+    top: 66px;
+    left: 14px;
+    right: 14px;
+    padding: 10px 12px;
+    font-size: 10px;
+    max-width: none;
+  }
+  .map-controls {
+    top: 151px;
+    right: 14px;
+  }
+  .leaflet-control-zoom {
+    margin-right: 15px !important;
+    margin-top: 269px !important;
+  }
+  .map-legend {
+    bottom: 137px;
+    left: 14px;
+    right: auto;
+    gap: 11px;
+    font-size: 8px;
+    padding: 8px 10px;
+  }
+  .leaflet-bottom {
+    bottom: 101px !important;
+  }
+  .bus-panel {
+    position: absolute;
+    z-index: 800;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    max-height: 76%;
+    border-radius: 20px 20px 0 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 -5px 25px #25344b0c;
+    overflow: hidden;
+    transition: height 0.25s;
+  }
+  .bus-panel.expanded {
+    height: 76%;
     overflow-y: auto;
-
-    padding: 20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(10, 22, 38, 0.97),
-            rgba(6, 17, 30, 0.97)
-        );
-
-    color: #ffffff;
-
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    border-radius: 20px;
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.40);
-
-    z-index: 1001;
-
-    animation: panelIn 0.25s ease both;
-}
-
-
-/* =========================================
-   PANEL SCROLLBAR
-========================================= */
-
-.bus-panel::-webkit-scrollbar {
-    width: 5px;
-}
-
-.bus-panel::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.bus-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-
-    border-radius: 999px;
-}
-
-
-/* =========================================
-   PANEL HEADER
-========================================= */
-
-.panel-header {
+  }
+  .sheet-toggle {
     display: flex;
-
+    width: 100%;
+    height: 96px;
+    flex-wrap: wrap;
+    align-content: center;
     align-items: center;
     justify-content: space-between;
-
-    padding-right: 38px;
-
-    margin-bottom: 20px;
-}
-
-.panel-label {
+    border: 0;
+    background: white;
+    padding: 12px 22px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 13px;
+    font-weight: 650;
+    gap: 13px;
+  }
+  .sheet-handle {
     display: block;
-
-    color: #5fd39a;
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.7px;
-}
-
-.panel-header h2 {
-    margin-top: 5px;
-
-    color: #ffffff;
-
-    font-size: 23px;
-
-    font-weight: 800;
-
-    letter-spacing: -0.5px;
-}
-
-
-/* =========================================
-   LIVE DOT
-========================================= */
-
-.live-dot {
-    width: 10px;
-    height: 10px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #20a866;
-
-    box-shadow:
-        0 0 0 5px rgba(32, 168, 102, 0.12),
-        0 0 15px rgba(32, 168, 102, 0.65);
-
-    animation: livePulse 2s ease-in-out infinite;
-}
-
-
-/* =========================================
-   BUS LIST
-========================================= */
-
-.bus-list {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 9px;
-}
-
-
-/* =========================================
-   BUS CARD
-========================================= */
-
-.bus-card {
-    width: 100%;
-
-    min-width: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    padding: 13px;
-
-    text-align: left;
-
-    background: rgba(255, 255, 255, 0.045);
-
-    color: #ffffff;
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    border-radius: 14px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.bus-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-
-    border-color: rgba(8, 123, 128, 0.55);
-
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.18);
-}
-
-.bus-card:active {
-    transform: scale(0.985);
-}
-
-
-/* =========================================
-   BUS ICON
-========================================= */
-
-.bus-icon {
-    width: 42px;
-    height: 42px;
-
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    margin-right: 11px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(8, 123, 128, 0.20),
-            rgba(8, 123, 128, 0.07)
-        );
-
-    border: 1px solid rgba(8, 123, 128, 0.20);
-
-    border-radius: 11px;
-
-    font-size: 20px;
-}
-
-
-/* =========================================
-   BUS DETAILS
-========================================= */
-
-.bus-details {
-    flex: 1;
-
-    min-width: 0;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 4px;
-}
-
-.bus-details strong {
-    color: #ffffff;
-
-    font-size: 14px;
-
-    font-weight: 800;
-}
-
-.bus-details span {
-    min-width: 0;
-
-    color: #8293a8;
-
-    font-size: 10px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-}
-
-
-/* =========================================
-   BUS STATUS
-========================================= */
-
-.bus-status {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    flex-shrink: 0;
-
-    white-space: nowrap;
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.4px;
-}
-
-.bus-status span {
-    width: 7px;
-    height: 7px;
-
-    display: inline-block;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-}
-
-
-/* =========================================
-   ONLINE
-========================================= */
-
-.bus-status.online {
-    color: #45d88d;
-}
-
-.bus-status.online span {
-    background: #20a866;
-
-    box-shadow:
-        0 0 0 3px rgba(32, 168, 102, 0.12),
-        0 0 8px rgba(32, 168, 102, 0.65);
-}
-
-
-/* =========================================
-   PAUSED
-========================================= */
-
-.bus-status.paused {
-    color: #f5b63b;
-}
-
-.bus-status.paused span {
-    background: #f59e0b;
-
-    box-shadow:
-        0 0 0 3px rgba(245, 158, 11, 0.12),
-        0 0 8px rgba(245, 158, 11, 0.55);
-}
-
-
-/* =========================================
-   OFFLINE
-========================================= */
-
-.bus-status.offline {
-    color: #f06b6b;
-}
-
-.bus-status.offline span {
-    background: #ef4444;
-
-    box-shadow:
-        0 0 0 3px rgba(239, 68, 68, 0.10);
-}
-
-
-/* =========================================
-   SELECTED BUS
-========================================= */
-
-.selected-bus {
-    margin-top: 17px;
-
-    padding: 18px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #087b80,
-            #075e68
-        );
-
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    border-radius: 15px;
-
-    box-shadow:
-        0 12px 30px rgba(8, 123, 128, 0.20);
-}
-
-
-/* =========================================
-   SELECTED LABEL
-========================================= */
-
-.selected-label {
-    display: block;
-
-    color: rgba(255, 255, 255, 0.65);
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.5px;
-}
-
-
-/* =========================================
-   SELECTED BUS NAME
-========================================= */
-
-.selected-bus h3 {
-    margin-top: 5px;
-
-    color: #ffffff;
-
-    font-size: 21px;
-
-    font-weight: 800;
-
-    letter-spacing: -0.4px;
-}
-
-
-/* =========================================
-   SELECTED INFORMATION
-========================================= */
-
-.selected-info {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 10px;
-
-    margin-top: 17px;
-
-    padding-top: 14px;
-
-    border-top:
-        1px solid
-        rgba(255, 255, 255, 0.13);
-}
-
-.selected-info div {
-    min-width: 0;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-.selected-info span {
-    color: rgba(255, 255, 255, 0.58);
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.6px;
-}
-
-.selected-info strong {
-    color: #ffffff;
-
+    width: 38px;
+    height: 4px;
+    border-radius: 4px;
+    background: #cdd6df;
+    margin: 0 calc(50% - 19px) 3px;
+  }
+  .sheet-toggle > .icon {
+    transform: rotate(180deg);
+    width: 18px;
+  }
+  .expanded .sheet-toggle {
+    height: 74px;
+    padding-bottom: 10px;
+  }
+  .expanded .sheet-toggle > .icon {
+    transform: none;
+  }
+  #mobile-count {
+    color: var(--muted);
     font-size: 11px;
-
-    font-weight: 800;
-
-    overflow-wrap: anywhere;
+    font-weight: 400;
+  }
+  .panel-heading {
+    padding-top: 10px;
+  }
+  .bus-panel:not(.expanded) #panel-content {
+    display: none;
+  }
+  .map-failure {
+    top: 45%;
+  }
+}
+@media (max-height: 620px) and (min-width: 761px) {
+  .panel-heading {
+    padding-top: 14px;
+  }
 }
 
-
-/* =========================================
-   CLOSE / MINIMIZE BUTTON
-========================================= */
-
-.minimize-btn {
-    position: absolute;
-
-    top: 12px;
-    right: 12px;
-
-    width: 31px;
-    height: 31px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    border-radius: 50%;
-
-    background: rgba(255, 255, 255, 0.07);
-
-    color: #ffffff;
-
-    font-size: 20px;
-
-    line-height: 1;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease;
-}
-
-.minimize-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-
-    transform: rotate(90deg);
-}
-
-
-/* =========================================
-   HIDDEN
-========================================= */
-
-.hidden {
-    display: none !important;
-}
-
-
-/* =========================================
-   LEAFLET CONTROLS
-========================================= */
-
-.leaflet-top.leaflet-left {
-    top: 92px;
-    left: 18px;
-}
-
-.leaflet-top.leaflet-right {
-    top: 92px;
-    right: 18px;
-}
-
-
-/* =========================================
-   LEAFLET CONTROL STYLE
-========================================= */
-
-.leaflet-control-zoom,
-.leaflet-control-scale {
-    border: none !important;
-}
-
-.leaflet-control-zoom a {
-    width: 36px !important;
-    height: 36px !important;
-
-    display: flex !important;
-
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(7, 19, 33, 0.88) !important;
-
-    color: #ffffff !important;
-
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-
-    backdrop-filter: blur(10px);
-
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.leaflet-control-zoom a:hover {
-    background: rgba(8, 123, 128, 0.90) !important;
-}
-
-.leaflet-control-zoom a:first-child {
-    border-radius: 10px 10px 0 0;
-}
-
-.leaflet-control-zoom a:last-child {
-    border-radius: 0 0 10px 10px;
-}
-
-
-/* =========================================
-   LEAFLET ATTRIBUTION
-========================================= */
-
-.leaflet-control-attribution {
-    background: rgba(7, 19, 33, 0.75) !important;
-
-    color: rgba(255, 255, 255, 0.60) !important;
-
-    border-radius: 8px 0 0 0;
-
-    backdrop-filter: blur(8px);
-}
-
-.leaflet-control-attribution a {
-    color: #76cfd0 !important;
-}
-
-
-/* =========================================
-   MAP PANEL ANIMATION
-========================================= */
-
-@keyframes panelIn {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(-10px)
-            scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
-}
-
-
-/* =========================================
-   LIVE PULSE
-========================================= */
-
-@keyframes livePulse {
-
-    0%,
-    100% {
-        opacity: 1;
-
-        box-shadow:
-            0 0 0 5px rgba(32, 168, 102, 0.12),
-            0 0 15px rgba(32, 168, 102, 0.65);
-    }
-
-    50% {
-        opacity: 0.65;
-
-        box-shadow:
-            0 0 0 8px rgba(32, 168, 102, 0.04),
-            0 0 20px rgba(32, 168, 102, 0.35);
-    }
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (max-width: 600px) {
-
-    .map-header {
-        top: 10px;
-
-        width: calc(100% - 20px);
-
-        height: 56px;
-
-        padding:
-            0
-            8px
-            0
-            10px;
-
-        border-radius: 15px;
-    }
-
-
-    /* Header title */
-
-    .map-header h1 {
-        font-size: 13px;
-
-        letter-spacing: 1px;
-    }
-
-
-    /* Back button */
-
-    .back-home {
-        padding: 8px 10px;
-
-        font-size: 11px;
-
-        border-radius: 9px;
-    }
-
-    .back-arrow {
-        font-size: 15px;
-    }
-
-
-    /* Status button */
-
-    .bus-status-nav {
-        padding: 8px 10px;
-
-        font-size: 10px;
-
-        border-radius: 9px;
-    }
-
-    .bus-status-nav::before {
-        width: 6px;
-        height: 6px;
-    }
-
-
-    /* Leaflet controls */
-
-    .leaflet-top.leaflet-left {
-        top: 76px;
-        left: 10px;
-    }
-
-    .leaflet-top.leaflet-right {
-        top: 76px;
-        right: 10px;
-    }
-
-
-    /* Panel */
-
-    .bus-panel {
-        top: 76px;
-
-        left: 10px;
-        right: 10px;
-
-        width: auto;
-
-        max-width: none;
-
-        max-height:
-            calc(100vh - 90px);
-
-        padding: 15px;
-
-        border-radius: 17px;
-    }
-
-
-    /* Panel heading */
-
-    .panel-header {
-        margin-bottom: 14px;
-    }
-
-    .panel-header h2 {
-        font-size: 19px;
-    }
-
-
-    /* Bus cards */
-
-    .bus-card {
-        padding: 11px;
-    }
-
-    .bus-icon {
-        width: 38px;
-        height: 38px;
-
-        margin-right: 9px;
-
-        font-size: 18px;
-    }
-
-    .bus-details strong {
-        font-size: 13px;
-    }
-
-    .bus-details span {
-        font-size: 9px;
-    }
-
-    .bus-status {
-        font-size: 8px;
-    }
-
-
-    /* Selected bus */
-
-    .selected-bus {
-        padding: 15px;
-    }
-
-    .selected-bus h3 {
-        font-size: 18px;
-    }
-
-    .selected-info {
-        gap: 8px;
-    }
-
-    .selected-info strong {
-        font-size: 10px;
-    }
-
-
-    /* Close */
-
-    .minimize-btn {
-        width: 29px;
-        height: 29px;
-
-        top: 10px;
-        right: 10px;
-    }
-}
-
-
-/* =========================================
-   SMALL PHONES
-========================================= */
-
-@media (max-width: 380px) {
-
-    .map-header h1 {
-        font-size: 11px;
-
-        letter-spacing: 0.7px;
-    }
-
-    .back-home {
-        padding: 7px 8px;
-
-        font-size: 10px;
-    }
-
-    .bus-status-nav {
-        padding: 7px 8px;
-
-        font-size: 9px;
-    }
-
-    .bus-panel {
-        padding: 12px;
-    }
-
-    .bus-card {
-        padding: 9px;
-    }
-
-    .bus-icon {
-        width: 35px;
-        height: 35px;
-
-        font-size: 16px;
-    }
-
-    .bus-status {
-        font-size: 7px;
-    }
-}
-
-
-/* =========================================
-   REDUCED MOTION
-========================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-        animation: none !important;
-
-        transition: none !important;
-    }
+.bus-marker-body:not(.is-moving) .bus-direction-arrow {
+  display: none;
 }
