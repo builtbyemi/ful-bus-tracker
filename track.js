@@ -9,6 +9,7 @@ import {
 } from "./js/routes.js";
 import { BusMarkers } from "./js/markers.js";
 import { subscribeFleet } from "./js/firebase-client.js";
+import { isPermissionDenied } from "./js/errors.js";
 
 const byId = (id) => document.getElementById(id);
 let map, markers, routeLine, routeOutline, routeRequest, resizeObserver;
@@ -18,6 +19,7 @@ let fleet = {},
   received = false,
   unavailable = false,
   failed = false,
+  accessDenied = false,
   offset = 0,
   disposed = false;
 let unsubscribe = () => {};
@@ -137,8 +139,9 @@ function render() {
       "Live tracking is not connected yet. Campus locations are available; current bus availability cannot be confirmed.";
   } else if (failed) {
     status.textContent = "Updates unavailable";
-    message.textContent =
-      "Bus updates could not be loaded. Check your connection or try reloading. Last known positions are not live.";
+    message.textContent = accessDenied
+      ? "Bus updates are unavailable because database access was denied. Please notify the transport administrator. Reload after access is restored."
+      : "Bus updates could not be loaded. Check your connection or try reloading. Last known positions are not live.";
   } else if (!connected || !navigator.onLine) {
     status.textContent = received ? "Connection lost" : "Connecting";
     message.textContent = received
@@ -328,9 +331,11 @@ subscribeFleet({
     fleet = value;
     received = true;
     failed = false;
+    accessDenied = false;
     render();
   },
-  onError() {
+  onError(error) {
+    accessDenied = isPermissionDenied(error);
     failed = true;
     connected = false;
     render();

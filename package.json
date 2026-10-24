@@ -9,5 +9,18 @@
     "firebase": "^12.4.0",
     "firebase-tools": "^15.34.1",
     "leaflet": "^1.9.4"
+  },
+  "name": "ful-bus-tracker",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/tracking.test.mjs tests/trip-controller.test.mjs",
+    "test:browser": "playwright test",
+    "test:rules": "node scripts/test-emulators.mjs"
   }
 }

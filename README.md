@@ -4,7 +4,7 @@ University bus tracking using the existing HTML, CSS, JavaScript, Leaflet, and F
 
 ## Local preview
 
-Node 20 or newer:
+Node 22.12 or newer:
 
 ```sh
 npm install
@@ -13,12 +13,15 @@ npm run dev
 
 Open **http://127.0.0.1:4173**. `index.html` is the homepage, `track.html` is the student map, and `driver.html` is the maintained driver portal. Existing URLs, including `Driver/driver.html`, remain compatibility redirects. The production publish directory is **not yet verified**.
 
-Firebase is intentionally disabled until verified public configuration is supplied in [js/config.js](js/config.js). The default preview shows campus locations and an honest tracking-unavailable state. It does not generate bus locations, call Firebase, or permit driver sign-in. Map tiles require internet access; map controls and Leaflet assets are local. The font has a system fallback.
+Your existing Firebase configuration in [js/config.js](js/config.js) is preserved. The application connects to that project; driver login is already working according to your verification. The database must allow the intended reads and assigned-driver writes before live tracking works. Follow [the Firebase Console setup guide](docs/FIREBASE_SETUP.md). Automated tests use isolated fixtures or local emulators, never this production configuration. Map tiles require internet access; Leaflet assets are local and the font has a system fallback.
+
+All three pages support dark mode. The header toggle saves your choice; before choosing, the interface follows your device setting.
 
 ## Project layout
 
 - `shared.css`: FUL palette, typography, navigation, focus states, shared components.
 - `style.css`, `track.css`, `driver.css`: screen-specific layouts.
+- `theme.css`, `js/theme.js`: shared light/dark appearance and saved preference.
 - `js/tracking.js`: coordinate validation, GPS freshness, movement, headings, and write cadence.
 - `js/markers.js`: custom SVG markers; interpolation only between accepted GPS fixes.
 - `js/routes.js`: existing campus coordinates, optional validated OSRM road reference.

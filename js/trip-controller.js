@@ -3,6 +3,7 @@ import {
   WRITE_INTERVAL_MS,
   HEARTBEAT_INTERVAL_MS,
 } from "./tracking.js";
+import { tripErrorMessage } from "./errors.js";
 
 // Browser GPS lifecycle is isolated from Firebase so cancellation and failures can be tested.
 export class TripController {
@@ -25,6 +26,7 @@ export class TripController {
     this.lastWrite = 0;
     this.writing = false;
     this.beating = false;
+    this.destroyed = false;
     this.state = {
       phase: "idle",
       message: "Ready when you are. Start a trip to share this bus’s location.",
@@ -35,7 +37,7 @@ export class TripController {
   }
   emit(patch) {
     Object.assign(this.state, patch);
-    this.onChange({ ...this.state });
+    if (!this.destroyed) this.onChange({ ...this.state });
   }
   connection(value) {
     this.connected = value;
@@ -52,6 +54,7 @@ export class TripController {
       this.finish().catch(() => {});
   }
   async start(routeId) {
+    if (this.destroyed) return;
     if (this.active || this.starting || this.ending || this.sessionId) return;
     if (!this.connected)
       throw new Error(
@@ -67,6 +70,7 @@ export class TripController {
       phase: "starting",
       message: "Preparing your trip…",
       lastSuccess: null,
+      lastGpsUpdate: null,
       accuracy: null,
       startedAt: null,
     });
@@ -93,7 +97,7 @@ export class TripController {
       });
       this.watch = this.geolocation.watchPosition(
         (position) => this.position(position, epoch),
-        (error) => this.gpsError(error),
+        (error) => this.gpsError(error, epoch),
         { enableHighAccuracy: true, maximumAge: 0, timeout: 20_000 },
       );
       this.timer = setInterval(() => this.heartbeat(), HEARTBEAT_INTERVAL_MS);
@@ -113,7 +117,10 @@ export class TripController {
         phase: "error",
         message: this.sessionId
           ? "Trip setup was interrupted. GPS is stopped. Reconnect and use End trip to confirm cleanup."
-          : error.message || "The trip could not start. Please try again.",
+          : tripErrorMessage(
+              error,
+              error.message || "The trip could not start. Please try again.",
+            ),
       });
     } finally {
       this.starting = false;
@@ -144,13 +151,15 @@ export class TripController {
           lastGpsUpdate: fix.lastGpsUpdate,
           accuracy: fix.accuracy,
         });
-    } catch {
+    } catch (error) {
       if (epoch === this.epoch) {
         this.stopLocal();
         this.emit({
           phase: "error",
-          message:
+          message: tripErrorMessage(
+            error,
             "The location update was not accepted. Sharing stopped. End this trip, then check your connection and bus assignment.",
+          ),
         });
       }
     } finally {
@@ -160,23 +169,26 @@ export class TripController {
   async heartbeat() {
     if (!this.active || !this.connected || this.beating) return;
     this.beating = true;
+    const epoch = this.epoch;
     try {
       await this.backend.heartbeat(this.sessionId);
-    } catch {
-      if (this.active) {
+    } catch (error) {
+      if (this.active && epoch === this.epoch) {
         this.stopLocal();
         this.emit({
           phase: "error",
-          message:
+          message: tripErrorMessage(
+            error,
             "Connection check failed. Sharing stopped. End this trip and reconnect.",
+          ),
         });
       }
     } finally {
       this.beating = false;
     }
   }
-  gpsError(error) {
-    if (!this.active) return;
+  gpsError(error, epoch = this.epoch) {
+    if (!this.active || epoch !== this.epoch) return;
     if (error.code === 1) {
       this.stopLocal();
       this.epoch++;
@@ -248,6 +260,7 @@ export class TripController {
     }
   }
   destroy() {
+    this.destroyed = true;
     this.stopLocal();
     this.epoch++;
   }

@@ -2,6 +2,7 @@ import { getFirebaseClient } from "./js/firebase-client.js";
 import { BUS_IDS, ageLabel, GPS_FRESH_MS } from "./js/tracking.js";
 import { createDriverBackend } from "./js/driver-backend.js";
 import { TripController } from "./js/trip-controller.js";
+import { isPermissionDenied } from "./js/errors.js";
 
 const byId = (id) => document.getElementById(id);
 let client,
@@ -44,6 +45,12 @@ function render() {
   message("driver-connection", connected ? "Connected" : "Disconnected");
   const busy = controller?.starting || controller?.ending;
   const ownsTrip = Boolean(controller?.sessionId);
+  if (busId && !ownsTrip && !window.isSecureContext) {
+    message(
+      "trip-message",
+      "Location sharing needs HTTPS or localhost. Open this portal using a secure HTTPS address.",
+    );
+  }
   byId("start-trip").hidden = ownsTrip;
   byId("start-trip").disabled =
     !busId || !connected || busy || !client || !window.isSecureContext;
@@ -90,7 +97,9 @@ function render() {
     : controller?.active
       ? fresh
         ? "Waiting"
-        : "GPS stale"
+        : tripState.lastGpsUpdate
+          ? "GPS stale"
+          : "Locating"
       : ownsTrip
         ? "Paused"
         : "Offline";
@@ -186,7 +195,8 @@ async function initialize() {
         assignmentUnsubscribe = db.onValue(
           db.ref(database, "drivers/" + user.uid + "/busId"),
           (snapshot) => assignmentChanged(snapshot, authEpoch),
-          () => {
+          (error) => {
+            if (authEpoch !== epoch || disposed) return;
             busId = null;
             controller?.destroy();
             controller = null;
@@ -194,7 +204,9 @@ async function initialize() {
             byId("assignment-message").hidden = false;
             message(
               "assignment-message",
-              "Your bus assignment could not be verified. Contact your transport administrator.",
+              isPermissionDenied(error)
+                ? "You are signed in, but access to your bus assignment was denied. Ask your transport administrator to check the database rules."
+                : "Your bus assignment could not be verified. Check your connection and sign in again.",
             );
             render();
           },

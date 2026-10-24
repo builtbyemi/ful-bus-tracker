@@ -47,6 +47,9 @@ export async function getFirebaseClient() {
       serverTimestamp() {
         return Date.now();
       },
+      async get(path) {
+        return { val: () => state.records[path] || null };
+      },
       async runTransaction(path, update) {
         const value = update(state.records[path] || null);
         if (value === undefined) return { committed: false };
@@ -55,7 +58,7 @@ export async function getFirebaseClient() {
       },
       onDisconnect() {
         return {
-          async update(value) {
+          async set(value) {
             state.disconnect = value;
           },
           async cancel() {

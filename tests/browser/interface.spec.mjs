@@ -3,6 +3,15 @@ import AxeBuilder from "@axe-core/playwright";
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/js/config.js", (route) =>
+    route.fulfill({
+      path: path.resolve("tests/fixtures/config-disabled.js"),
+      contentType: "text/javascript",
+    }),
+  );
+});
+
 for (const [name, width, height] of [
   ["desktop", 1440, 1000],
   ["tablet", 820, 1180],
@@ -180,4 +189,24 @@ test("legacy entry points lead to maintained pages", async ({ page }) => {
       new RegExp("/" + destination.replace(".", "\\.") + "$"),
     );
   }
+});
+
+test("denied student reads explain unavailable updates without reporting live buses", async ({
+  page,
+}) => {
+  await page.route("**/js/firebase-client.js", (route) =>
+    route.fulfill({
+      path: path.resolve("tests/fixtures/fleet.js"),
+      contentType: "text/javascript",
+    }),
+  );
+  await page.goto("/track.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#connection-status")).toHaveText("Connected");
+  await page.evaluate(() =>
+    window.testFleet.onError({ code: "PERMISSION_DENIED" }),
+  );
+  await expect(page.locator("#map-notice")).toContainText(
+    "database access was denied",
+  );
+  await expect(page.locator("#live-count")).toHaveText("0 live");
 });

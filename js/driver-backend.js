@@ -1,5 +1,6 @@
 // All writes go through an authenticated, administrator-assigned bus reference.
 // Matching database rules are in database.rules.json; client checks alone are not security.
+import { timestamp } from "./tracking.js";
 export function createDriverBackend(client, busId) {
   const { db, database } = client;
   const reference = db.ref(database, "buses/" + busId);
@@ -36,14 +37,26 @@ export function createDriverBackend(client, busId) {
       const result = await db.runTransaction(
         reference,
         (current) => {
-          if (
-            !current ||
-            !current.tripStarted ||
-            typeof current.lastHeartbeat !== "number" ||
-            now - current.lastHeartbeat <= 45_000
-          )
-            return;
-          return { ...current, status: "OFFLINE", tripStarted: false };
+          // A no-op still reaches the server and retries if this cached idle
+          // record changed. Aborting here would skip that server comparison.
+          if (current?.tripStarted === false && current.schemaVersion === 2)
+            return current;
+          const lastActivity = Math.max(
+            0,
+            ...["lastHeartbeat", "lastGpsUpdate", "lastSeen", "timestamp"].map(
+              (key) => timestamp(current?.[key]) || 0,
+            ),
+          );
+          if (now - lastActivity <= 45_000) return;
+          // Normalize old records instead of copying legacy fields rejected by schema v2.
+          return {
+            busId,
+            schemaVersion: 2,
+            sessionId: crypto.randomUUID(),
+            status: "OFFLINE",
+            tripStarted: false,
+            lastHeartbeat: db.serverTimestamp(),
+          };
         },
         { applyLocally: false },
       );
@@ -53,7 +66,13 @@ export function createDriverBackend(client, busId) {
         );
     },
     arm(sessionId) {
-      return db.onDisconnect(reference).update(stopped(sessionId));
+      // Register a complete valid record: onDisconnect.update checks child writes
+      // separately, which conflicts with the cross-field trip/status validation.
+      return db.onDisconnect(reference).set({
+        busId,
+        schemaVersion: 2,
+        ...stopped(sessionId),
+      });
     },
     write(sessionId, fix) {
       return db.update(reference, {

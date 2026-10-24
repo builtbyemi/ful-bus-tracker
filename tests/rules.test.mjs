@@ -53,6 +53,34 @@ beforeEach(async () => {
   );
 });
 after(async () => environment?.cleanup());
+test("legacy stale records can be normalized but a fresh trip cannot be replaced", async () => {
+  const legacy = {
+    busId: "FUL-001",
+    status: "ONLINE",
+    tripStarted: true,
+    lastHeartbeat: Date.now() - 60_000,
+    lastGpsUpdate: Date.now() - 60_000,
+    timestamp: Date.now() - 60_000,
+  };
+  await environment.withSecurityRulesDisabled((context) =>
+    context.database().ref("buses/FUL-001").set(legacy),
+  );
+  const idle = {
+    busId: "FUL-001",
+    schemaVersion: 2,
+    sessionId: secondSession,
+    status: "OFFLINE",
+    tripStarted: false,
+    lastHeartbeat: Date.now(),
+  };
+  await assertSucceeds(driver.ref("buses/FUL-001").set(idle));
+  await assertSucceeds(
+    driver.ref("buses/FUL-001").set(record({ status: "STARTING" })),
+  );
+  await assertFails(
+    driver.ref("buses/FUL-001").set({ ...idle, lastHeartbeat: Date.now() }),
+  );
+});
 test("students can read bus data, but cannot write buses or read driver assignments", async () => {
   await assertSucceeds(anonymous.ref("buses").once("value"));
   await assertFails(anonymous.ref("buses/FUL-001").set(record()));

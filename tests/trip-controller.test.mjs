@@ -35,6 +35,7 @@ function setup(overrides = {}) {
     trip,
     calls,
     states,
+    gpsErrorCallback: () => failure,
     fix: (patch = {}) =>
       success({
         timestamp: Date.now(),
@@ -51,17 +52,57 @@ function setup(overrides = {}) {
   };
 }
 const flush = () => new Promise((resolve) => setImmediate(resolve));
+test("late GPS errors and heartbeat failures from an ended trip cannot stop a new trip", async () => {
+  let rejectHeartbeat;
+  const { trip, gpsErrorCallback } = setup({
+    heartbeat: () =>
+      new Promise((resolve, reject) => {
+        rejectHeartbeat = reject;
+      }),
+  });
+  try {
+    await trip.start();
+    const oldError = gpsErrorCallback();
+    const oldHeartbeat = trip.heartbeat();
+    await trip.stop();
+    await trip.start();
+    oldError({ code: 1 });
+    rejectHeartbeat(new Error("old connection failed"));
+    await oldHeartbeat;
+    assert.equal(trip.active, true);
+    assert.equal(trip.state.phase, "locating");
+  } finally {
+    trip.destroy();
+  }
+});
+test("permission-denied start gives database and assignment guidance", async () => {
+  const { trip } = setup({
+    claim: async () => {
+      throw { code: "PERMISSION_DENIED" };
+    },
+  });
+  await trip.start();
+  assert.match(trip.state.message, /database rules and your bus assignment/);
+  assert.equal(trip.sessionId, null);
+  trip.destroy();
+});
 test("failed setup cleanup retains the session so End trip can retry", async () => {
   const { trip } = setup({
-    arm: async () => { throw new Error("network lost"); },
-    end: async () => { throw new Error("offline"); },
+    arm: async () => {
+      throw new Error("network lost");
+    },
+    end: async () => {
+      throw new Error("offline");
+    },
   });
   try {
     await trip.start();
     assert.equal(trip.active, false);
     assert.ok(trip.sessionId);
     assert.match(trip.state.message, /End trip/);
-  } finally { trip.destroy(); }
+  } finally {
+    trip.destroy();
+  }
 });
 test("trip publishes only fresh accurate GPS, throttles writes, and clears watch ID zero on stop", async () => {
   const { trip, calls, fix } = setup();
