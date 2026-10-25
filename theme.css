@@ -1,0 +1,201 @@
+:root {
+  color-scheme: light;
+}
+.theme-toggle {
+  flex-shrink: 0;
+}
+.site-header .brand {
+  margin-right: auto;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e4ecf6;
+  --muted: #b0bfd2;
+  --surface: #182434;
+  --bg: #101823;
+  --border: #33445b;
+  --soft: #213948;
+  --sky-ink: #8dd3e2;
+  --warning: #f1cb8d;
+  --danger: #ffb4ae;
+}
+html[data-theme="dark"]
+  :is(
+    h1,
+    h2,
+    .text-link,
+    .text-button,
+    .tracker-nav-active,
+    .nav-links a[aria-current]
+  ) {
+  color: #b7cbef;
+}
+html[data-theme="dark"]
+  :is(
+    .site-header,
+    .site-footer,
+    .nav-links,
+    .card,
+    .icon-button,
+    .button.secondary,
+    .skip-link,
+    .steps article,
+    .journey-visual,
+    .benefits-strip,
+    .bus-panel,
+    .sheet-toggle,
+    .bus-card,
+    .map-title,
+    .map-top > .pill,
+    .map-legend,
+    .map-notice,
+    .campus-label,
+    .campus-marker,
+    .bus-marker-body,
+    .bus-marker-label,
+    input,
+    select,
+    dialog
+  ) {
+  background: var(--surface);
+  border-color: var(--border);
+}
+html[data-theme="dark"]
+  :is(
+    .hero-tag,
+    .bus-card.selected,
+    .selected .bus-icon,
+    .visual-icon,
+    .step-icon,
+    .portal-icon
+  ) {
+  background: var(--soft);
+}
+html[data-theme="dark"] .hero-tag {
+  color: var(--sky-ink);
+}
+html[data-theme="dark"]
+  :is(
+    .bus-icon,
+    .feature > .icon,
+    .benefits-inner .icon,
+    .route-copy .text-link
+  ) {
+  color: #a9c1eb;
+}
+html[data-theme="dark"]
+  :is(.step-number, .campus-card-head > span, .overview-label) {
+  color: var(--muted);
+}
+html[data-theme="dark"] .bus-card.selected {
+  border-color: var(--sky);
+}
+html[data-theme="dark"] .bus-card:hover {
+  background: var(--soft);
+}
+html[data-theme="dark"] .notice {
+  background: #213948;
+  border-color: #38586c;
+  color: #cee7ee;
+}
+html[data-theme="dark"] .notice.error {
+  background: #412c32;
+  border-color: #80535b;
+  color: #ffd1cb;
+}
+html[data-theme="dark"] .pill.warning {
+  background: #423524;
+  color: var(--warning);
+}
+html[data-theme="dark"] .pill.live {
+  background: var(--soft);
+  color: var(--sky-ink);
+}
+html[data-theme="dark"] .button.secondary:hover {
+  background: var(--soft);
+  border-color: var(--sky);
+}
+html[data-theme="dark"] :is(.map-area, .map-area #map) {
+  background: #17232c;
+}
+/* Theme the raster tiles only; preserve the crest, bus markers and route colours. */
+html[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.8);
+}
+html[data-theme="dark"] .leaflet-control-zoom a {
+  background: var(--surface);
+}
+html[data-theme="dark"]
+  :is(
+    .leaflet-control-attribution,
+    .leaflet-control-scale-line,
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip,
+    .leaflet-tooltip
+  ) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme="dark"] .leaflet-control-attribution a {
+  color: var(--sky-ink);
+}
+html[data-theme="dark"] .leaflet-popup-close-button {
+  color: var(--ink);
+}
+html[data-theme="dark"] .bus-marker-body {
+  color: #a9c1eb;
+}
+html[data-theme="dark"] .bus-marker-body.is-stale {
+  background: #253143;
+  color: #adbbcb;
+  border-color: #6d7e93;
+}
+html[data-theme="dark"] .sheet-handle {
+  background: #71839a;
+}
+html[data-theme="dark"] input:disabled {
+  background: var(--bg);
+}
+html[data-theme="dark"] .password-field button {
+  color: #b7cbef;
+}
+
+@media (max-width: 760px) {
+  .site-header .header-inner {
+    gap: 8px;
+  }
+}
+@media (max-width: 480px) {
+  .tracking-page nav .button {
+    font-size: 0;
+    padding: 8px;
+    min-width: 44px;
+  }
+  .tracking-page nav .button .icon {
+    display: block;
+    width: 18px;
+  }
+  body:not(.tracking-page) .site-header .text-link {
+    font-size: 0;
+    min-width: 44px;
+    justify-content: center;
+  }
+  body:not(.tracking-page) .site-header .text-link .icon {
+    display: block;
+    width: 20px;
+  }
+}
+@media (max-width: 380px) {
+  .site-header .brand strong {
+    font-size: 13px;
+  }
+  .site-header .brand small {
+    font-size: 7px;
+  }
+  .site-header .brand img {
+    width: 32px;
+    height: 40px;
+  }
+}

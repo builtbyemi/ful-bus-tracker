@@ -1,96 +1,250 @@
-
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>FUL Bus Tracker - Driver</title>
-
-    <link rel="stylesheet" href="driver.css">
-</head>
-
-<body>
-
-    <main class="driver-page">
-
-        <!-- Login -->
-        <section id="loginSection" class="driver-card">
-
-            <h1>FUL BUS TRACKER</h1>
-
-            <p>Driver Portal</p>
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Enter driver password"
-            >
-
-            <button onclick="login()">
-                LOGIN
-            </button>
-
-            <p id="loginMessage"></p>
-
-        </section>
-
-
-        <!-- Dashboard -->
-        <section id="dashboardSection" class="driver-card hidden">
-
-            <h1>DRIVER DASHBOARD</h1>
-
-            <p class="welcome">
-                Welcome, Driver
+  <head>
+    <script src="js/theme.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#49618D" />
+    <title>Driver portal · FUL Bus Tracker</title>
+    <link
+      rel="icon"
+      href="images/Federal_University_Lokoja_fav_0.png"
+      type="image/png"
+    />
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="driver.css" />
+    <script type="module" src="driver.js"></script>
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to driver portal</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html" aria-label="FUL Bus Tracker home"
+          ><img
+            src="images/Federal_University_Lokoja_fav_0.png"
+            alt="Federal University Lokoja crest"
+            width="48"
+            height="54"
+          /><span
+            ><strong>FUL Bus Tracker<span class="brand-dot">.</span></strong
+            ><small>Federal University Lokoja</small></span
+          ></a
+        ><a href="track.html" class="text-link"
+          >Campus map
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#arrow" /></svg
+        ></a>
+      </div>
+    </header>
+    <main class="driver-layout container" id="main">
+      <div class="driver-intro">
+        <span class="eyebrow">THE JOURNEY STARTS WITH YOU</span>
+        <h1>Keep our<br />campus moving.</h1>
+        <p>
+          A simple, secure space to share your bus’s location and help students
+          plan their day.
+        </p>
+        <div class="driver-benefit">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#bus" />
+          </svg>
+          <div>
+            <strong>Your bus. Your trip.</strong>
+            <p>Access is linked to your assigned university bus.</p>
+          </div>
+        </div>
+        <div class="driver-benefit">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#locate" />
+          </svg>
+          <div>
+            <strong>Share only when you’re ready.</strong>
+            <p>You control when location sharing starts and stops.</p>
+          </div>
+        </div>
+        <div class="driver-benefit">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#shield" />
+          </svg>
+          <div>
+            <strong>Stay connected, safely.</strong>
+            <p>
+              Set up before driving. Keep the page open and let the tracker
+              handle the updates.
             </p>
-
-            <div class="bus-info">
-                <span>Bus</span>
-                <strong>FUL-001</strong>
+          </div>
+        </div>
+        <p class="driver-attribution">
+          FEDERAL UNIVERSITY LOKOJA · DRIVER PORTAL
+        </p>
+      </div>
+      <div class="driver-workspace">
+        <section
+          class="card login-card"
+          id="login-section"
+          aria-labelledby="login-title"
+        >
+          <div class="portal-icon">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#shield" />
+            </svg>
+          </div>
+          <span class="eyebrow">WELCOME BACK</span>
+          <h2 id="login-title">Driver sign in</h2>
+          <p class="muted">
+            Use the account provided by your transport administrator.
+          </p>
+          <p class="notice" id="configuration-message" role="status">
+            Checking sign-in availability…
+          </p>
+          <form id="login-form">
+            <label for="email">Email address</label
+            ><input
+              id="email"
+              type="email"
+              autocomplete="username"
+              placeholder="Your driver email"
+              required
+              maxlength="254"
+              disabled
+            />
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input
+                id="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                disabled
+              /><button
+                type="button"
+                id="toggle-password"
+                aria-label="Show password"
+                aria-pressed="false"
+                disabled
+              >
+                Show
+              </button>
             </div>
-
-            <div class="status">
-                Status:
-                <strong id="status">OFFLINE</strong>
-            </div>
-
             <button
-                id="startButton"
-                onclick="startTrip()"
+              type="submit"
+              class="button primary"
+              id="login-button"
+              disabled
             >
-                START TRIP
+              Sign in
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#arrow" />
+              </svg>
             </button>
-
-            <button
-                id="stopButton"
-                onclick="stopTrip()"
-                class="stop hidden"
-            >
-                STOP TRIP
-            </button>
-
-            <div class="location">
-
-                <p>
-                    Latitude:
-                    <span id="latitude">--</span>
-                </p>
-
-                <p>
-                    Longitude:
-                    <span id="longitude">--</span>
-                </p>
-
-            </div>
-
+            <p id="login-message" class="form-message" role="alert"></p>
+          </form>
+          <p class="login-help">
+            Need access or a password reset?<br />Contact your university
+            transport administrator.
+          </p>
         </section>
-
+        <section
+          class="card dashboard-card"
+          id="dashboard-section"
+          hidden
+          aria-labelledby="dashboard-title"
+        >
+          <div class="dashboard-top">
+            <span class="eyebrow">DRIVER WORKSPACE</span
+            ><button id="logout-button" class="text-button">Sign out</button>
+          </div>
+          <h2 id="dashboard-title">Your assigned bus</h2>
+          <div class="assigned-bus">
+            <span class="portal-icon"
+              ><svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#bus" /></svg
+            ></span>
+            <div>
+              <span>ASSIGNED BUS</span>
+              <h3 id="assigned-bus">Checking assignment…</h3>
+            </div>
+            <span class="pill" id="driver-status">Offline</span>
+          </div>
+          <p id="assignment-message" class="notice" hidden role="alert"></p>
+          <dl class="driver-facts">
+            <div>
+              <dt>Connection</dt>
+              <dd id="driver-connection">Connecting</dd>
+            </div>
+            <div>
+              <dt>Location permission</dt>
+              <dd id="gps-permission">Not requested</dd>
+            </div>
+            <div>
+              <dt>GPS accuracy</dt>
+              <dd id="driver-accuracy">Not available</dd>
+            </div>
+            <div>
+              <dt>Last successful update</dt>
+              <dd id="last-success">Not received</dd>
+            </div>
+            <div>
+              <dt>Trip duration</dt>
+              <dd id="trip-duration">00:00</dd>
+            </div>
+          </dl>
+          <label class="field-label" for="trip-route">Trip route</label
+          ><select id="trip-route">
+            <option value="">Route not specified</option>
+            <option value="adankolo-felele">
+              Adankolo ↔ Felele campus connection
+            </option>
+          </select>
+          <p class="notice trip-message" id="trip-message" role="status">
+            Ready when you are. Start a trip to share your location.
+          </p>
+          <div class="trip-controls">
+            <button class="button primary" id="start-trip" disabled>
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#locate" />
+              </svg>
+              Start trip</button
+            ><button class="button danger" id="end-trip" hidden>
+              End trip
+            </button>
+          </div>
+          <button id="recover-trip" class="text-button recover-button" hidden>
+            Recover a disconnected trip
+          </button>
+          <div class="background-note">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#signal" />
+            </svg>
+            <p>
+              Keep this page open and your phone unlocked. Location sharing may
+              pause when the browser is in the background or the screen is
+              locked. Students will see when GPS is stale.
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
-
-
-    <script src="driver.js"></script>
-
-</body>
+    <dialog id="end-dialog" aria-labelledby="end-title">
+      <h2 id="end-title">End this trip?</h2>
+      <p>Your bus will stop sharing its location with students.</p>
+      <form method="dialog">
+        <button value="cancel" class="button secondary" autofocus>
+          Keep sharing</button
+        ><button value="end" class="button danger">End trip</button>
+      </form>
+    </dialog>
+    <footer class="driver-footer">
+      <p>
+        FUL Bus Tracker · Built for the Federal University Lokoja community.
+      </p>
+      <a href="index.html" class="text-link">Back to home</a>
+    </footer>
+    <noscript
+      ><p class="notice">
+        Enable JavaScript to sign in and share a bus location.
+      </p></noscript
+    >
+  </body>
 </html>

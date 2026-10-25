@@ -1,90 +1,405 @@
-
-
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>FUL Bus Tracker</title>
-
-<link rel="stylesheet" href="style.css">
-
-
-</head>
-
-<body>
-
-
-<!-- SCROLLING TEXT -->
-<div class="scrolling-text">
-    <div class="scrolling-track">
-
-        <span>
-            🚌 FUL BUS TRACKER • REAL-TIME BUS LOCATIONS • KNOW WHERE YOUR BUS IS • MOVE SMARTER •
-        </span>
-
-        <span>
-            🚌 FUL BUS TRACKER • REAL-TIME BUS LOCATIONS • KNOW WHERE YOUR BUS IS • MOVE SMARTER •
-        </span>
-
-    </div>
-</div>
-
-
-<!-- MAIN TRACKER -->
-<main class="tracker">
-
-    <section class="tracker-content">
-
-        <h1>FUL BUS TRACKER</h1>
-
-        <h2>Federal University Lokoja</h2>
-
+  <head>
+    <script src="js/theme.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Track Federal University Lokoja campus buses, see fresh location updates, and plan your campus journey."
+    />
+    <meta name="theme-color" content="#49618D" />
+    <title>FUL Bus Tracker · Your campus, connected</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="images/Federal_University_Lokoja_fav_0.png"
+    />
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="script.js"></script>
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html" aria-label="FUL Bus Tracker home"
+          ><img
+            src="images/Federal_University_Lokoja_fav_0.png"
+            alt="Federal University Lokoja crest"
+            width="48"
+            height="54"
+          /><span
+            ><strong>FUL Bus Tracker<span class="brand-dot">.</span></strong
+            ><small>Federal University Lokoja</small></span
+          ></a
+        >
+        <button
+          class="icon-button menu-toggle"
+          aria-label="Open navigation"
+          aria-expanded="false"
+          aria-controls="navigation"
+        >
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#menu" />
+          </svg>
+        </button>
+        <nav class="nav-links" id="navigation" aria-label="Main navigation">
+          <a href="track.html">Track a Bus</a
+          ><a href="#how-it-works">How It Works</a
+          ><a href="#campus-routes">Campus Route</a
+          ><a class="button secondary small" href="driver.html"
+            >Driver Login
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#arrow" /></svg
+          ></a>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <section class="hero container">
+        <div class="hero-copy">
+          <div class="hero-tag"><span></span> YOUR CAMPUS, CONNECTED</div>
+          <h1>Your Campus<br />Journey,<br /><span>Made Easier.</span></h1>
+          <p>
+            Track Federal University Lokoja buses in real time, check their
+            availability, and plan your journey with confidence.
+          </p>
+          <div class="hero-actions">
+            <a href="track.html" class="button primary"
+              >Track a Bus
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#arrow" /></svg></a
+            ><a href="driver.html" class="button secondary">Driver Portal</a>
+          </div>
+          <div class="hero-note">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#shield" />
+            </svg>
+            No sign-up needed for students. Just open and track.
+          </div>
+        </div>
+        <div
+          class="journey-visual"
+          aria-label="Illustrated campus overview. Not a live map."
+        >
+          <div class="visual-heading">
+            <span class="eyebrow">A MORE CONNECTED CAMPUS</span
+            ><span class="overview-label">Route overview</span>
+          </div>
+          <svg
+            class="campus-illustration"
+            viewBox="0 0 520 380"
+            role="img"
+            aria-label="Schematic connection between Adankolo and Felele campus; not road geometry"
+          >
+            <defs>
+              <pattern
+                id="grid"
+                width="36"
+                height="36"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M36 0H0V36"
+                  fill="none"
+                  stroke="#dde7e9"
+                  stroke-width="1"
+                />
+              </pattern>
+            </defs>
+            <rect width="520" height="380" fill="#eef4f3" />
+            <rect width="520" height="380" fill="url(#grid)" />
+            <path
+              d="M420-30c-95 130 30 190-40 270s-10 130 50 160"
+              fill="none"
+              stroke="#d2e9ee"
+              stroke-width="55"
+            />
+            <g fill="#dce7e0">
+              <rect x="25" y="45" width="75" height="45" rx="12" />
+              <rect x="255" y="240" width="58" height="80" rx="13" />
+              <rect x="160" y="30" width="60" height="42" rx="10" />
+              <rect x="42" y="175" width="36" height="70" rx="10" />
+              <rect x="435" y="200" width="70" height="55" rx="12" />
+            </g>
+            <g fill="none" stroke="#fff" stroke-width="14">
+              <path
+                d="M-30 140h260l100-95h230M100 410V250l70-70V-20M-20 335h260l95-90h220"
+              />
+              <path d="m300-20 30 100v300" />
+            </g>
+            <path
+              d="M112 290v-65q0-35 35-35h72q35 0 35-35v-20q0-35 35-35h47"
+              fill="none"
+              stroke="#fff"
+              stroke-width="12"
+            />
+            <path
+              d="M112 290v-65q0-35 35-35h72q35 0 35-35v-20q0-35 35-35h47"
+              fill="none"
+              stroke="#4cacc1"
+              stroke-width="5"
+              stroke-dasharray="8 7"
+            />
+            <g stroke="#49618d" stroke-width="3" fill="white">
+              <circle cx="112" cy="290" r="9" />
+              <circle cx="336" cy="100" r="9" />
+            </g>
+            <g font-family="Inter,Arial,sans-serif">
+              <rect
+                x="278"
+                y="31"
+                width="166"
+                height="48"
+                rx="9"
+                fill="white"
+              />
+              <text
+                x="293"
+                y="51"
+                font-size="12"
+                fill="#25344b"
+                font-weight="700"
+              >
+                Felele Campus
+              </text>
+              <text x="293" y="67" font-size="10" fill="#5d6c80">
+                Federal University Lokoja
+              </text>
+              <rect
+                x="38"
+                y="312"
+                width="183"
+                height="48"
+                rx="9"
+                fill="white"
+              />
+              <text
+                x="53"
+                y="332"
+                font-size="12"
+                fill="#25344b"
+                font-weight="700"
+              >
+                Adankolo
+              </text>
+              <text x="53" y="348" font-size="10" fill="#5d6c80">
+                College of Health Sciences
+              </text>
+            </g>
+            <g transform="translate(167 153)">
+              <rect width="66" height="66" rx="17" fill="#49618d" />
+              <rect
+                x="19"
+                y="13"
+                width="28"
+                height="37"
+                rx="7"
+                fill="none"
+                stroke="white"
+                stroke-width="2.5"
+              />
+              <path
+                d="M20 31h26m-14-17v17M24 50v4m18-4v4M24 40h3m12 0h3"
+                stroke="white"
+                stroke-width="2.5"
+              />
+            </g>
+          </svg>
+          <div class="visual-caption">
+            <div class="visual-icon">
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#route" />
+              </svg>
+            </div>
+            <div>
+              <strong>Two campuses. A simpler journey.</strong
+              ><span>Adankolo &amp; Felele campus locations</span>
+            </div>
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#arrow" />
+            </svg>
+          </div>
+          <p class="illustration-note">
+            Illustration only · Open the tracker for current bus availability
+          </p>
+        </div>
+      </section>
+      <div class="benefits-strip">
+        <div class="container benefits-inner">
+          <span
+            ><svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#pin" />
+            </svg>
+            Real-time location updates</span
+          ><span
+            ><svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#signal" />
+            </svg>
+            Clear bus availability</span
+          ><span
+            ><svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#route" />
+            </svg>
+            Know your campus connection</span
+          ><span
+            ><svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#shield" />
+            </svg>
+            Made for the FUL community</span
+          >
+        </div>
+      </div>
+      <section class="section container" id="how-it-works">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">LESS WAITING, MORE KNOWING</span>
+            <h2>Your next ride, in three steps.</h2>
+          </div>
+          <p>A little more certainty for your everyday campus journey.</p>
+        </div>
+        <div class="steps">
+          <article>
+            <span class="step-number">01</span>
+            <div class="step-icon">
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#pin" />
+              </svg>
+            </div>
+            <h3>Open the tracker</h3>
+            <p>
+              See the campus map on your phone, tablet, or laptop. No student
+              account needed.
+            </p>
+          </article>
+          <article>
+            <span class="step-number">02</span>
+            <div class="step-icon">
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#bus" />
+              </svg>
+            </div>
+            <h3>Find your bus</h3>
+            <p>
+              Choose a bus to check its availability, latest GPS update, and
+              location accuracy.
+            </p>
+          </article>
+          <article>
+            <span class="step-number">03</span>
+            <div class="step-icon">
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#route" />
+              </svg>
+            </div>
+            <h3>Plan your journey</h3>
+            <p>
+              Follow fresh updates before heading out. If tracking is
+              interrupted, you’ll know.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section class="route-section container" id="campus-routes">
+        <div class="route-copy">
+          <span class="eyebrow">FAMILIAR PLACES. BETTER CONNECTED.</span>
+          <h2>Across campus.<br />Within reach.</h2>
+          <p>
+            Find Adankolo and Felele on one map, with bus updates that clearly
+            show when they were last received.
+          </p>
+          <a href="track.html" class="text-link"
+            >Explore the campus map
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#arrow" /></svg
+          ></a>
+        </div>
+        <div class="campus-card card">
+          <div class="campus-card-head">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#route" /></svg
+            ><strong>Campus connection</strong><span>LOKOJA, NIGERIA</span>
+          </div>
+          <div class="campus-stop">
+            <i></i>
+            <div>
+              <strong>Adankolo</strong>
+              <p>College of Health Sciences</p>
+            </div>
+            <span>01</span>
+          </div>
+          <div class="campus-stop">
+            <i></i>
+            <div>
+              <strong>Felele Campus</strong>
+              <p>Federal University Lokoja</p>
+            </div>
+            <span>02</span>
+          </div>
+          <p class="route-note">
+            Campus locations from the existing project. Official stops, road
+            route, and schedules await confirmation.
+          </p>
+        </div>
+      </section>
+      <section class="features-section container">
+        <div>
+          <span class="eyebrow">BUILT AROUND YOUR JOURNEY</span>
+          <h2>Useful details.<br />Honest updates.</h2>
+        </div>
+        <div class="feature">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#clock" />
+          </svg>
+          <h3>Freshness you can see</h3>
+          <p>
+            Check the age of every location update. Stale GPS is never shown as
+            live.
+          </p>
+        </div>
+        <div class="feature">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#locate" />
+          </svg>
+          <h3>A clearer picture</h3>
+          <p>
+            Directional bus markers and GPS accuracy help you understand the
+            map.
+          </p>
+        </div>
+        <div class="feature">
+          <svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#shield" />
+          </svg>
+          <h3>A dedicated driver portal</h3>
+          <p>
+            Authorized drivers control when their assigned bus shares its
+            location.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand" href="index.html" aria-label="FUL Bus Tracker home"
+          ><img
+            src="images/Federal_University_Lokoja_fav_0.png"
+            alt="Federal University Lokoja crest"
+            width="48"
+            height="54"
+          /><span
+            ><strong>FUL Bus Tracker<span class="brand-dot">.</span></strong
+            ><small>Federal University Lokoja</small></span
+          ></a
+        >
         <p>
-            Track FUL buses in real-time with live bus
-            locations and route information.
-            Plan your journey quickly, easily, and conveniently.
+          Built for the Federal University Lokoja community.<br />A campus
+          transport project by builtbyemi ·
+          <a href="driver.html" class="text-link">Driver portal ↗</a>
         </p>
-
-
-        <!-- MAIN ACTIONS -->
-        <div class="action-buttons">
-
-            <a href="track.html" class="track-btn">
-                TRACK MY BUS
-            </a>
-
-            <a href="Driver/driver.html" class="driver-login">
-                🚍 DRIVER LOGIN
-            </a>
-
-        </div>
-
-
-        <!-- SCHOOL BRANDING -->
-        <div class="school-brand">
-
-            <img
-                src="images/ful-logo.jfif"
-                alt="Federal University Lokoja Logo"
-            >
-
-            <span>Version 2.0.0</span>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-<script src="script.js"></script>
-<script type="module" src="analytics.js"></script>
-
-
-</body>
+      </div>
+    </footer>
+  </body>
 </html>

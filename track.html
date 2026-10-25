@@ -1,227 +1,243 @@
-
-
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>FUL Bus Tracker</title>
-
-<!-- Leaflet -->
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
->
-
-<!-- Track CSS -->
-<link rel="stylesheet" href="track.css">
-```
-
-</head>
-
-<body>
-
-
-<!-- NAVBAR -->
-<header class="map-header">
-
-    <a href="index.html" class="back-home">
-    <span class="back-arrow">←</span>
-    <span>Back Home</span>
-</a>
-
-    <h1>FUL BUS TRACKER</h1>
-
-    <button
-        class="bus-status-nav"
-        onclick="toggleBusPanel()"
-        type="button"
-    >
-        🚌 Bus Status
-    </button>
-
-</header>
-
-
-<!-- MAP -->
-<main>
-
-    <div id="map"></div>
-
-
-    <!-- BUS STATUS PANEL -->
-    <aside class="bus-panel hidden">
-
-        <!-- Close / Minimize -->
-        <button
-            class="minimize-btn"
-            onclick="toggleBusPanel()"
-            type="button"
-            aria-label="Close bus status"
+  <head>
+    <script src="js/theme.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#49618D" />
+    <title>Live campus map · FUL Bus Tracker</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="images/Federal_University_Lokoja_fav_0.png"
+    />
+    <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="track.css" />
+    <script defer src="assets/vendor/leaflet/leaflet.js"></script>
+    <script type="module" src="track.js"></script>
+    <link rel="stylesheet" href="theme.css" />
+  </head>
+  <body class="tracking-page">
+    <a href="#bus-panel" class="skip-link">Skip to bus information</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="FUL Bus Tracker home"
+          ><img
+            src="images/Federal_University_Lokoja_fav_0.png"
+            alt="Federal University Lokoja crest"
+            width="48"
+            height="54"
+          /><span
+            ><strong>FUL Bus Tracker<span class="brand-dot">.</span></strong
+            ><small>Federal University Lokoja</small></span
+          ></a
         >
-            ×
+        <nav aria-label="Tracker navigation">
+          <a class="text-link home-link" href="index.html">Home</a
+          ><span class="tracker-nav-active">Campus map</span
+          ><a class="button secondary small" href="driver.html"
+            >Driver portal
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#arrow" /></svg
+          ></a>
+        </nav>
+      </div>
+    </header>
+    <main class="tracking-layout">
+      <div class="map-area">
+        <div id="map" role="region" aria-label="Campus bus map"></div>
+        <div class="map-top">
+          <span class="map-title"
+            ><svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#pin" />
+            </svg>
+            Lokoja, Nigeria</span
+          ><span class="pill" id="connection-status" role="status"
+            >Connecting</span
+          >
+        </div>
+        <div class="map-notice notice" id="map-notice" role="status">
+          Connecting to bus updates…
+        </div>
+        <div class="map-controls">
+          <button
+            id="fit-map"
+            class="icon-button"
+            aria-label="Show campus locations"
+            title="Show campus locations"
+          >
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#locate" />
+            </svg></button
+          ><button
+            id="focus-bus"
+            class="icon-button"
+            aria-label="Focus selected bus"
+            title="Focus selected bus"
+            disabled
+          >
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#bus" />
+            </svg>
+          </button>
+        </div>
+        <div class="map-legend">
+          <span><i class="legend-campus"></i> Campus location</span
+          ><span><i class="legend-live"></i> Fresh GPS</span
+          ><span><i class="legend-stale"></i> Last known</span>
+        </div>
+        <div
+          class="map-failure notice error"
+          id="map-failure"
+          hidden
+          role="alert"
+        >
+          The map could not load. Check your connection and reload. Bus
+          information is still available below.
+        </div>
+      </div>
+      <aside
+        class="bus-panel"
+        id="bus-panel"
+        aria-label="Bus information"
+        tabindex="-1"
+      >
+        <button
+          class="sheet-toggle"
+          id="sheet-toggle"
+          aria-expanded="false"
+          aria-controls="panel-content"
+        >
+          <span class="sheet-handle"></span
+          ><span>Bus information <span id="mobile-count">· 3 buses</span></span
+          ><svg class="icon" aria-hidden="true">
+            <use href="assets/icons.svg#chevron" />
+          </svg>
         </button>
-
-
-        <!-- Panel Header -->
-        <div class="panel-header">
-
+        <div id="panel-content">
+          <div class="panel-heading">
+            <span class="eyebrow">YOUR CAMPUS, CONNECTED</span>
             <div>
-                <span class="panel-label">
-                    LIVE TRACKING
-                </span>
-
-                <h2>
-                    Bus Status
-                </h2>
+              <h1>Track your bus</h1>
+              <span class="pill" id="live-count">0 live</span>
             </div>
-
-            <span class="live-dot"></span>
-
-        </div>
-
-
-        <!-- BUS LIST -->
-        <div class="bus-list">
-
-            <!-- FUL-001 -->
+            <p>Choose a bus to see its latest update.</p>
+          </div>
+          <div class="bus-list" role="group" aria-label="Choose a bus">
             <button
-                class="bus-card"
-                onclick="selectBus('FUL-001')"
-                type="button"
+              class="bus-card selected"
+              data-bus="FUL-001"
+              aria-pressed="true"
             >
-
-                <div class="bus-icon">
-                    🚌
-                </div>
-
-                <div class="bus-details">
-                    <strong>FUL-001</strong>
-                    <span>Main Campus Route</span>
-                </div>
-
-                <div
-                    id="busStatus-FUL-001"
-                    class="bus-status offline"
-                >
-                    <span></span>
-                    OFFLINE
-                </div>
-
+              <span class="bus-icon"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="assets/icons.svg#bus" /></svg></span
+              ><span class="bus-name"
+                ><strong>FUL-001</strong
+                ><small id="route-FUL-001">Route not reported</small></span
+              ><span class="pill" id="status-FUL-001">Unavailable</span></button
+            ><button class="bus-card" data-bus="FUL-002" aria-pressed="false">
+              <span class="bus-icon"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="assets/icons.svg#bus" /></svg></span
+              ><span class="bus-name"
+                ><strong>FUL-002</strong
+                ><small id="route-FUL-002">Route not reported</small></span
+              ><span class="pill" id="status-FUL-002">Unavailable</span></button
+            ><button class="bus-card" data-bus="FUL-003" aria-pressed="false">
+              <span class="bus-icon"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="assets/icons.svg#bus" /></svg></span
+              ><span class="bus-name"
+                ><strong>FUL-003</strong
+                ><small id="route-FUL-003">Route not reported</small></span
+              ><span class="pill" id="status-FUL-003">Unavailable</span>
             </button>
-
-
-            <!-- FUL-002 -->
-            <button
-                class="bus-card"
-                onclick="selectBus('FUL-002')"
-                type="button"
-            >
-
-                <div class="bus-icon">
-                    🚌
-                </div>
-
-                <div class="bus-details">
-                    <strong>FUL-002</strong>
-                    <span>Main Campus Route</span>
-                </div>
-
-                <div
-                    id="busStatus-FUL-002"
-                    class="bus-status offline"
-                >
-                    <span></span>
-                    OFFLINE
-                </div>
-
-            </button>
-
-
-            <!-- FUL-003 -->
-            <button
-                class="bus-card"
-                onclick="selectBus('FUL-003')"
-                type="button"
-            >
-
-                <div class="bus-icon">
-                    🚌
-                </div>
-
-                <div class="bus-details">
-                    <strong>FUL-003</strong>
-                    <span>Main Campus Route</span>
-                </div>
-
-                <div
-                    id="busStatus-FUL-003"
-                    class="bus-status offline"
-                >
-                    <span></span>
-                    OFFLINE
-                </div>
-
-            </button>
-
-        </div>
-
-
-        <!-- SELECTED BUS -->
-        <div class="selected-bus">
-
-            <span class="selected-label">
-                SELECTED BUS
-            </span>
-
-            <h3 id="selectedBus">
-                No bus selected
-            </h3>
-
-            <div class="selected-info">
-                
-                <div>
-                     <span>Status</span>
-                     <strong id="selectedStatus">—</strong>
-                </div>
-
-
-                <div>
-                    <span>Routes</span>
-                    <strong id="selectedRoute">—</strong>
-                </div>
-
-                <div>
-                    <span>Last Seen</span>
-                    <strong id="selectedLastSeen">—</strong>
-                </div>
-
+          </div>
+          <div class="empty-state" id="empty-state">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#signal" />
+            </svg>
+            <div>
+              <strong>Waiting for bus updates</strong>
+              <p>
+                Available buses will appear on the map when fresh GPS is
+                received.
+              </p>
             </div>
-
+          </div>
+          <section class="selected-card" aria-labelledby="selected-bus">
+            <div class="selected-heading">
+              <span class="eyebrow">BUS DETAILS</span
+              ><span class="pill" id="selected-status">Unavailable</span>
+            </div>
+            <h2 id="selected-bus">FUL-001</h2>
+            <dl class="bus-facts">
+              <div>
+                <dt>Current route</dt>
+                <dd id="selected-route">Not reported</dd>
+              </div>
+              <div>
+                <dt>Direction of travel</dt>
+                <dd id="selected-direction">Not determined</dd>
+              </div>
+              <div>
+                <dt>Last GPS update</dt>
+                <dd id="selected-gps">Not received</dd>
+              </div>
+              <div>
+                <dt>GPS accuracy</dt>
+                <dd id="selected-accuracy">Not available</dd>
+              </div>
+              <div>
+                <dt>Next stop</dt>
+                <dd>Not confirmed</dd>
+              </div>
+              <div>
+                <dt>Estimated arrival</dt>
+                <dd>Not available</dd>
+              </div>
+            </dl>
+            <p class="detail-note">
+              Arrival times need a verified route and reliable movement data.
+            </p>
+          </section>
+          <section class="route-panel" aria-labelledby="route-title">
+            <div class="route-panel-heading">
+              <svg class="icon" aria-hidden="true">
+                <use href="assets/icons.svg#route" />
+              </svg>
+              <h2 id="route-title">Campus connection</h2>
+            </div>
+            <div class="route-stops">
+              <span>Adankolo</span><i></i><span>Felele Campus</span>
+            </div>
+            <p>
+              Campus locations are from the existing project. Bus stops and the
+              official road route are not yet confirmed.
+            </p>
+            <label class="route-switch"
+              ><input type="checkbox" id="show-route" /> Show road
+              reference</label
+            >
+            <p id="route-message" class="route-message" role="status">
+              An optional driving reference, not an official bus route.
+            </p>
+          </section>
+          <div class="panel-footer">
+            <svg class="icon" aria-hidden="true">
+              <use href="assets/icons.svg#shield" />
+            </svg>
+            Only fresh, accurate GPS is shown as live.
+          </div>
         </div>
-
-    </aside>
-
-</main>
-
-
-<!-- Leaflet -->
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
-
-<!-- Track JS -->
-<script
-    type="module"
-    src="track.js">
-</script>
-
-<script type="module" src="analytics.js"></script>
-</body>
-
+      </aside>
+    </main>
+    <noscript
+      ><p class="notice">
+        Enable JavaScript to use the live map and bus updates.
+      </p></noscript
+    >
+  </body>
 </html>
